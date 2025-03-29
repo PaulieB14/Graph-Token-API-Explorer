@@ -226,36 +226,6 @@
       margin-bottom: 8px;
       color: #666;
     }
-    .token-price {
-      font-size: 1em;
-      color: #333;
-      margin-top: 5px;
-    }
-    .token-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8em;
-      margin-top: 15px;
-      color: #666;
-      border-top: 1px solid #eee;
-      padding-top: 10px;
-    }
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 0.7em;
-      margin-left: 5px;
-      font-weight: 600;
-    }
-    .badge-low {
-      background-color: #fff3e0;
-      color: #ff9800;
-    }
-    .badge-high {
-      background-color: #e8f5e9;
-      color: #4caf50;
-    }
     .portfolio-container {
       display: flex;
       flex-direction: column;
@@ -295,77 +265,6 @@
       background-color: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-    .comparison-insights {
-      margin-top: 20px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      background-color: #f0f8ff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .comparison-insights h4 {
-      color: #6747ED;
-      margin-top: 0;
-      border-bottom: 1px solid #cce5ff;
-      padding-bottom: 10px;
-    }
-    select {
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      background-color: white;
-      flex: 1;
-      min-width: 150px;
-    }
-    select:focus {
-      outline: none;
-      border-color: #6747ED;
-      box-shadow: 0 0 0 3px rgba(103, 71, 237, 0.2);
-    }
-    .summary-card {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
-      border: 1px solid #cce5ff;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .summary-value {
-      font-size: 1.8em;
-      margin: 15px 0;
-      color: #4CAF50;
-      font-weight: bold;
-    }
-    .risk-assessment {
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 15px;
-    }
-    .risk-low {
-      background-color: #e8f5e9;
-      border: 1px solid #c8e6c9;
-    }
-    .risk-medium {
-      background-color: #fff3e0;
-      border: 1px solid #ffe0b2;
-    }
-    .risk-high {
-      background-color: #ffebee;
-      border: 1px solid #ffcdd2;
-    }
-    .risk-title {
-      font-weight: bold;
-      margin-top: 0;
-    }
-    .risk-low .risk-title {
-      color: #2e7d32;
-    }
-    .risk-medium .risk-title {
-      color: #ef6c00;
-    }
-    .risk-high .risk-title {
-      color: #c62828;
-    }
     .pulse-animation {
       animation: pulse 2s infinite;
     }
@@ -397,11 +296,6 @@
         <button data-address="0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503">Coinbase Wallet</button>
         <button data-address="0xbe0eb53f46cd790cd13851d5eff43d12404d33e8">Binance Wallet 3</button>
       </div>
-      <div class="quick-buttons" style="margin-top: 5px;">
-        <button data-address="0xc6b0562605d35ee710138402b878ffe6f2e23807">LINK Whale</button>
-        <button data-address="0xf977814e90da44bfa03b6295a0616a897441acec">Binance 8</button>
-        <button data-address="0x1a9c8182c09f50c8318d769245bea52c32be35bc">Axie Infinity</button>
-      </div>
     </div>
     
     <div class="card">
@@ -415,7 +309,7 @@
       
       <div id="visualization" class="tab-content active">
         <div id="token-grid" class="token-grid">
-          <p class="loading">Enter an address and click "Fetch Balances" to see token data</p>
+          <p class="loading">Click "Fetch Balances" to see token data</p>
         </div>
       </div>
       
@@ -429,14 +323,8 @@
             <div class="portfolio-card">
               <h4>Portfolio Insights</h4>
               <div id="portfolio-insights">
-                <p>Fetch token balances to see portfolio insights</p>
+                <p>Click "Fetch Balances" to see portfolio insights</p>
               </div>
-            </div>
-          </div>
-          <div class="portfolio-card">
-            <h4>Risk Assessment</h4>
-            <div id="risk-assessment">
-              <p>Fetch token balances to see risk assessment</p>
             </div>
           </div>
         </div>
@@ -447,16 +335,16 @@
         <div style="margin-bottom: 20px;">
           <p>Compare tokens in your portfolio:</p>
           <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
-            <select id="token1-select" style="flex: 1; padding: 10px; min-width: 150px;">
+            <select id="token1-select">
               <option value="">Select first token</option>
             </select>
-            <select id="token2-select" style="flex: 1; padding: 10px; min-width: 150px;">
+            <select id="token2-select">
               <option value="">Select second token</option>
             </select>
-            <button id="compare-btn" style="padding: 10px 20px;">Compare</button>
+            <button id="compare-btn">Compare</button>
           </div>
         </div>
-        <div id="comparison-result" style="display: flex; flex-direction: column; gap: 15px;">
+        <div id="comparison-result" class="comparison-container">
           <p>Select two tokens to compare</p>
         </div>
       </div>
@@ -467,638 +355,196 @@
       </div>
       
       <div id="features" class="tab-content">
-        <h3>Cool Things You Can Do With The Graph Token API</h3>
+        <h3>Features & Ideas</h3>
         <ul class="features-list">
           <li><strong>Portfolio Tracking:</strong> Build a dashboard to track your crypto portfolio across multiple addresses</li>
-          <li><strong>Token Discovery:</strong> Find all tokens owned by an address, including lesser-known ones</li>
-          <li><strong>Historical Analysis:</strong> Track token balance changes over time to analyze trading patterns</li>
-          <li><strong>Whale Watching:</strong> Monitor large holders of ETH or GRT to anticipate market movements</li>
-          <li><strong>DeFi Integration:</strong> Connect with DeFi protocols to show yield opportunities for your tokens</li>
-          <li><strong>Cross-Chain Analysis:</strong> Compare token holdings across different blockchain networks</li>
-          <li><strong>Smart Contract Interaction:</strong> Use token data to interact with smart contracts</li>
-          <li><strong>Community Insights:</strong> Analyze token distribution within specific communities</li>
-        </ul>
-        
-        <h3>Specific for ETH and GRT</h3>
-        <ul class="features-list">
-          <li><strong>ETH Staking Analysis:</strong> Track ETH staking positions and rewards</li>
-          <li><strong>GRT Delegation Tracking:</strong> Monitor GRT delegations to indexers on The Graph Network</li>
-          <li><strong>ETH Gas Usage:</strong> Analyze gas usage patterns for addresses</li>
-          <li><strong>GRT Curation Signals:</strong> Track curation activities for GRT holders</li>
-          <li><strong>ETH Layer 2 Balances:</strong> Compare ETH holdings across Layer 2 solutions</li>
+          <li><strong>Token Discovery:</strong> Find all tokens owned by an address</li>
+          <li><strong>Historical Analysis:</strong> Track token balance changes over time</li>
         </ul>
       </div>
     </div>
   </div>
 
-  <!-- Add Chart.js for visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   
   <script>
-    // Popular token information for better visualization
-    const tokenInfo = {
-      'ETH': {
-        name: 'Ethereum',
-        logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-        color: '#627EEA',
-        description: 'Native cryptocurrency of the Ethereum blockchain'
-      },
-      'USDC': {
-        name: 'USD Coin',
-        logo: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
-        color: '#2775CA',
-        description: 'Stablecoin pegged to the US dollar'
-      },
-      'USDT': {
-        name: 'Tether',
-        logo: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
-        color: '#26A17B',
-        description: 'Stablecoin pegged to the US dollar'
-      },
-      'WBTC': {
-        name: 'Wrapped Bitcoin',
-        logo: 'https://cryptologos.cc/logos/wrapped-bitcoin-wbtc-logo.png',
-        color: '#F09242',
-        description: 'Bitcoin on the Ethereum blockchain'
-      },
-      'LINK': {
-        name: 'Chainlink',
-        logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png',
-        color: '#2A5ADA',
-        description: 'Decentralized oracle network'
-      },
-      'UNI': {
-        name: 'Uniswap',
-        logo: 'https://cryptologos.cc/logos/uniswap-uni-logo.png',
-        color: '#FF007A',
-        description: 'Decentralized exchange protocol'
-      },
-      'AAVE': {
-        name: 'Aave',
-        logo: 'https://cryptologos.cc/logos/aave-aave-logo.png',
-        color: '#B6509E',
-        description: 'Decentralized lending protocol'
-      },
-      'GRT': {
-        name: 'The Graph',
-        logo: 'https://cryptologos.cc/logos/the-graph-grt-logo.png',
-        color: '#6747ED',
-        description: 'Decentralized protocol for indexing blockchain data'
-      },
-      'MATIC': {
-        name: 'Polygon',
-        logo: 'https://cryptologos.cc/logos/polygon-matic-logo.png',
-        color: '#8247E5',
-        description: 'Layer 2 scaling solution for Ethereum'
-      },
-      'COMP': {
-        name: 'Compound',
-        logo: 'https://cryptologos.cc/logos/compound-comp-logo.png',
-        color: '#00D395',
-        description: 'Decentralized lending protocol'
-      },
-      'DAI': {
-        name: 'Dai',
-        logo: 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png',
-        color: '#F5AC37',
-        description: 'Decentralized stablecoin pegged to the US dollar'
-      },
-      'SHIB': {
-        name: 'Shiba Inu',
-        logo: 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png',
-        color: '#FFA409',
-        description: 'Meme token on the Ethereum blockchain'
-      },
-      'CRO': {
-        name: 'Cronos',
-        logo: 'https://cryptologos.cc/logos/cronos-cro-logo.png',
-        color: '#103F68',
-        description: 'Native token of the Crypto.com Chain'
-      },
-      'APE': {
-        name: 'ApeCoin',
-        logo: 'https://cryptologos.cc/logos/apecoin-ape-logo.png',
-        color: '#0054F9',
-        description: 'Governance token for the APE ecosystem'
-      },
-      'SAND': {
-        name: 'The Sandbox',
-        logo: 'https://cryptologos.cc/logos/the-sandbox-sand-logo.png',
-        color: '#00ADEF',
-        description: 'Virtual world built on the Ethereum blockchain'
-      },
-      'MANA': {
-        name: 'Decentraland',
-        logo: 'https://cryptologos.cc/logos/decentraland-mana-logo.png',
-        color: '#FF2D55',
-        description: 'Virtual reality platform on the Ethereum blockchain'
-      },
-      'AXS': {
-        name: 'Axie Infinity',
-        logo: 'https://cryptologos.cc/logos/axie-infinity-axs-logo.png',
-        color: '#0055D5',
-        description: 'Governance token for the Axie Infinity game'
-      },
-      'DOGE': {
-        name: 'Dogecoin',
-        logo: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png',
-        color: '#C2A633',
-        description: 'Original meme cryptocurrency'
-      },
-      'SOL': {
-        name: 'Solana',
-        logo: 'https://cryptologos.cc/logos/solana-sol-logo.png',
-        color: '#14F195',
-        description: 'High-performance blockchain'
-      }
+    // Mock token data for different addresses
+    const mockTokenData = {
+      '0x28c6c06298d514db089934071355e5743bf21d60': [
+        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '50000000000000000000', price_usd: 2500 },
+        { symbol: 'USDT', name: 'Tether', decimals: 6, balance: '1000000000', price_usd: 1 },
+        { symbol: 'LINK', name: 'Chainlink', decimals: 18, balance: '200000000000000000000', price_usd: 15 }
+      ],
+      '0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503': [
+        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '30000000000000000000', price_usd: 2500 },
+        { symbol: 'USDC', name: 'USD Coin', decimals: 6, balance: '500000000', price_usd: 1 }
+      ],
+      '0xbe0eb53f46cd790cd13851d5eff43d12404d33e8': [
+        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '100000000000000000000', price_usd: 2500 },
+        { symbol: 'GRT', name: 'The Graph', decimals: 18, balance: '5000000000000000000000', price_usd: 0.2 }
+      ]
     };
-    
-    // Global variables to store data
+
+    // Token info for visualization
+    const tokenInfo = {
+      'ETH': { name: 'Ethereum', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', color: '#627EEA' },
+      'USDT': { name: 'Tether', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.png', color: '#26A17B' },
+      'LINK': { name: 'Chainlink', logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png', color: '#2A5ADA' },
+      'USDC': { name: 'USD Coin', logo: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', color: '#2775CA' },
+      'GRT': { name: 'The Graph', logo: 'https://cryptologos.cc/logos/the-graph-grt-logo.png', color: '#6747ED' }
+    };
+
     let currentTokenData = [];
     let portfolioChart = null;
-    
-    // Get token info helper function
+
+    // Helper functions
     function getTokenInfo(symbol) {
-      return tokenInfo[symbol] || {
-        name: symbol,
-        logo: null,
-        color: '#6747ED', // Default color
-        description: 'Token on the Ethereum blockchain'
-      };
+      return tokenInfo[symbol] || { name: symbol, logo: null, color: '#6747ED' };
     }
-    
-    // Simple tab functionality
-    function openTab(tabId) {
-      console.log('Opening tab:', tabId);
-      
-      // Hide all tab content
-      const tabContents = document.getElementsByClassName('tab-content');
-      for (let i = 0; i < tabContents.length; i++) {
-        tabContents[i].classList.remove('active');
-      }
-      
-      // Remove active class from all tabs
-      const tabs = document.getElementsByClassName('tab');
-      for (let i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove('active');
-      }
-      
-      // Show the selected tab content
-      document.getElementById(tabId).classList.add('active');
-      
-      // Add active class to the clicked tab
-      const clickedTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
-      if (clickedTab) {
-        clickedTab.classList.add('active');
-        
-        // If switching to portfolio tab, render the chart
-        if (tabId === 'portfolio' && currentTokenData.length > 0) {
-          console.log('Rendering portfolio chart');
-          renderPortfolioChart();
-        }
-      }
-    }
-    
-    // Set up event handlers
-    document.addEventListener('DOMContentLoaded', function() {
-      // Set up tab click handlers
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-          openTab(this.dataset.tab);
-        });
-      });
-      
-      // Set up wallet button click handlers
-      document.querySelectorAll('.quick-buttons button').forEach(button => {
-        button.addEventListener('click', function() {
-          const addressValue = this.getAttribute('data-address');
-          if (addressValue) {
-            document.getElementById('address').value = addressValue;
-            document.getElementById('fetch-btn').click();
-          }
-        });
-      });
-      
-      // Add animation to fetch button
-      const fetchBtn = document.getElementById('fetch-btn');
-      fetchBtn.addEventListener('click', function() {
-        this.classList.remove('pulse-animation');
-        void this.offsetWidth; // Trigger reflow
-        this.classList.add('pulse-animation');
-      });
-    });
-    
-    // Format token balance with proper decimals
+
     function formatTokenBalance(balance, decimals) {
-      if (!balance) return '0';
       return (parseFloat(balance) / Math.pow(10, decimals)).toFixed(4);
     }
-    
-    // Format USD value with commas and 2 decimal places
+
     function formatUSD(value) {
-      if (!value) return '$0.00';
-      return '$' + parseFloat(value).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+      return '$' + parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Fetch balances (mock data)
+    function fetchBalances() {
+      const address = document.getElementById('address').value.toLowerCase();
+      currentTokenData = mockTokenData[address] || [
+        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '1000000000000000000', price_usd: 2500 }
+      ];
+      currentTokenData.forEach(token => {
+        token.value_usd = (parseFloat(token.balance) / Math.pow(10, token.decimals)) * token.price_usd;
+      });
+      updateUI();
+    }
+
+    // Update UI across all tabs
+    function updateUI() {
+      updateTokenVisualization();
+      updatePortfolioAnalysis();
+      updateTokenComparison();
+      updateRawJSON();
+    }
+
+    function updateTokenVisualization() {
+      const grid = document.getElementById('token-grid');
+      grid.innerHTML = '';
+      currentTokenData.forEach(token => {
+        const info = getTokenInfo(token.symbol);
+        const balance = formatTokenBalance(token.balance, token.decimals);
+        const value = formatUSD(token.value_usd);
+        grid.innerHTML += `
+          <div class="token-card">
+            <div class="token-header">
+              ${info.logo ? `<img src="${info.logo}" class="token-logo" alt="${token.symbol}">` : ''}
+              <div>
+                <div class="token-symbol">${token.symbol}</div>
+                <div class="token-name">${token.name}</div>
+              </div>
+            </div>
+            <div class="token-balance">${balance} ${token.symbol}</div>
+            <div class="token-value">${value}</div>
+          </div>
+        `;
       });
     }
-    
-    // Render portfolio chart
+
+    function updatePortfolioAnalysis() {
+      const insights = document.getElementById('portfolio-insights');
+      const totalValue = currentTokenData.reduce((sum, token) => sum + token.value_usd, 0);
+      insights.innerHTML = `
+        <p><strong>Total Value:</strong> ${formatUSD(totalValue)}</p>
+        <p><strong>Number of Tokens:</strong> ${currentTokenData.length}</p>
+      `;
+      renderPortfolioChart();
+    }
+
     function renderPortfolioChart() {
       const ctx = document.getElementById('portfolio-chart').getContext('2d');
-      
-      // Filter tokens with value data
-      const tokensWithValue = currentTokenData.filter(token => token.price_usd && token.value_usd);
-      
-      if (tokensWithValue.length === 0) {
-        document.getElementById('portfolio-insights').innerHTML = '<p>No tokens with price data found</p>';
-        return;
-      }
-      
-      // Sort tokens by value (descending)
-      tokensWithValue.sort((a, b) => b.value_usd - a.value_usd);
-      
-      // Prepare data for chart
-      const labels = tokensWithValue.map(token => token.symbol);
-      const values = tokensWithValue.map(token => token.value_usd);
-      
-      // Get colors from token info
-      const colors = tokensWithValue.map(token => {
-        const info = getTokenInfo(token.symbol);
-        return info.color;
-      });
-      
-      // Destroy previous chart if it exists
-      if (portfolioChart) {
-        portfolioChart.destroy();
-      }
-      
-      // Create new chart
+      if (portfolioChart) portfolioChart.destroy();
       portfolioChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: labels,
+          labels: currentTokenData.map(token => token.symbol),
           datasets: [{
-            data: values,
-            backgroundColor: colors,
+            data: currentTokenData.map(token => token.value_usd),
+            backgroundColor: currentTokenData.map(token => getTokenInfo(token.symbol).color),
             borderWidth: 1,
-            borderColor: '#ffffff',
-            hoverOffset: 10
+            borderColor: '#ffffff'
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: 'right',
-              labels: {
-                font: {
-                  family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                  size: 12
-                },
-                padding: 15
-              }
-            },
-            title: {
-              display: true,
-              text: 'Portfolio Allocation',
-              font: {
-                family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-                size: 16,
-                weight: 'bold'
-              },
-              color: '#333',
-              padding: {
-                top: 10,
-                bottom: 20
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const label = context.label || '';
-                  const value = context.raw || 0;
-                  const percentage = ((value / values.reduce((a, b) => a + b, 0)) * 100).toFixed(1);
-                  return `${label}: ${formatUSD(value)} (${percentage}%)`;
-                }
-              }
-            }
-          },
-          animation: {
-            animateScale: true,
-            animateRotate: true,
-            duration: 1000
+            legend: { position: 'right' },
+            title: { display: true, text: 'Portfolio Allocation' }
           }
         }
       });
-      
-      // Generate portfolio insights
-      const totalValue = values.reduce((sum, value) => sum + value, 0);
-      const topToken = tokensWithValue[0];
-      const topTokenPercentage = ((topToken.value_usd / totalValue) * 100).toFixed(2);
-      
-      let insightsHtml = `
-        <p><strong>Total Portfolio Value:</strong> ${formatUSD(totalValue)}</p>
-        <p><strong>Number of Tokens:</strong> ${currentTokenData.length} (${tokensWithValue.length} with price data)</p>
-        <p><strong>Largest Holding:</strong> ${topToken.symbol} (${topTokenPercentage}% of portfolio)</p>
-        <p><strong>Portfolio Concentration:</strong> ${getConcentrationLevel(topTokenPercentage)}</p>
-      `;
-      
-      document.getElementById('portfolio-insights').innerHTML = insightsHtml;
-      
-      // Generate risk assessment
-      const riskFactors = [];
-      
-      // Check portfolio concentration
-      if (parseFloat(topTokenPercentage) > 70) {
-        riskFactors.push('High concentration in a single asset (' + topToken.symbol + ')');
-      }
-      
-      // Check for low liquidity tokens
-      const lowLiquidityTokens = tokensWithValue.filter(token => token.low_liquidity);
-      if (lowLiquidityTokens.length > 0) {
-        const lowLiquidityValue = lowLiquidityTokens.reduce((sum, token) => sum + token.value_usd, 0);
-        const lowLiquidityPercentage = ((lowLiquidityValue / totalValue) * 100).toFixed(2);
-        
-        if (parseFloat(lowLiquidityPercentage) > 20) {
-          riskFactors.push(`${lowLiquidityPercentage}% of portfolio in low liquidity tokens`);
-        }
-      }
-      
-      // Check for stablecoins
-      const stablecoins = tokensWithValue.filter(token => 
-        ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP'].includes(token.symbol)
-      );
-      const stablecoinValue = stablecoins.reduce((sum, token) => sum + token.value_usd, 0);
-      const stablecoinPercentage = ((stablecoinValue / totalValue) * 100).toFixed(2);
-      
-      let riskLevel = 'Low';
-      let riskColor = 'green';
-      let riskClass = 'risk-low';
-      
-      if (riskFactors.length >= 2) {
-        riskLevel = 'High';
-        riskColor = 'red';
-        riskClass = 'risk-high';
-      } else if (riskFactors.length === 1) {
-        riskLevel = 'Medium';
-        riskColor = 'orange';
-        riskClass = 'risk-medium';
-      }
-      
-      let riskHtml = `
-        <div class="risk-assessment ${riskClass}">
-          <p class="risk-title">Risk Level: ${riskLevel}</p>
-      `;
-      
-      if (riskFactors.length > 0) {
-        riskHtml += '<ul style="margin-top: 10px;">';
-        riskFactors.forEach(factor => {
-          riskHtml += `<li>${factor}</li>`;
+    }
+
+    function updateTokenComparison() {
+      const token1Select = document.getElementById('token1-select');
+      const token2Select = document.getElementById('token2-select');
+      token1Select.innerHTML = '<option value="">Select first token</option>' + 
+        currentTokenData.map(token => `<option value="${token.symbol}">${token.symbol}</option>`).join('');
+      token2Select.innerHTML = '<option value="">Select second token</option>' + 
+        currentTokenData.map(token => `<option value="${token.symbol}">${token.symbol}</option>`).join('');
+    }
+
+    function updateRawJSON() {
+      document.getElementById('json-response').textContent = JSON.stringify(currentTokenData, null, 2);
+    }
+
+    // Tab functionality
+    function openTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+      if (tabId === 'portfolio' && currentTokenData.length > 0) renderPortfolioChart();
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => openTab(tab.dataset.tab));
+      });
+
+      document.querySelectorAll('.quick-buttons button').forEach(button => {
+        button.addEventListener('click', () => {
+          document.getElementById('address').value = button.dataset.address;
+          fetchBalances();
         });
-        riskHtml += '</ul>';
-      } else {
-        riskHtml += '<p>Your portfolio appears well-diversified with no major risk factors identified.</p>';
-      }
-      
-      riskHtml += `
-        <p style="margin-top: 10px;"><strong>Stablecoin Allocation:</strong> ${stablecoinPercentage}% of portfolio</p>
-        </div>
-      `;
-      
-      document.getElementById('risk-assessment').innerHTML = riskHtml;
-    }
-    
-    // Helper function to determine concentration level
-    function getConcentrationLevel(percentage) {
-      const p = parseFloat(percentage);
-      if (p > 70) return '<span style="color: red;">Very High</span>';
-      if (p > 50) return '<span style="color: orange;">High</span>';
-      if (p > 30) return '<span style="color: #ffc107;">Medium</span>';
-      return '<span style="color: green;">Well Diversified</span>';
-    }
-    
-    // Compare tokens
-    document.getElementById('compare-btn').addEventListener('click', function() {
-      const token1Id = document.getElementById('token1-select').value;
-      const token2Id = document.getElementById('token2-select').value;
-      
-      if (!token1Id || !token2Id) {
-        document.getElementById('comparison-result').innerHTML = '<p>Please select two tokens to compare</p>';
-        return;
-      }
-      
-      const token1 = currentTokenData.find(t => t.contract === token1Id);
-      const token2 = currentTokenData.find(t => t.contract === token2Id);
-      
-      if (!token1 || !token2) {
-        document.getElementById('comparison-result').innerHTML = '<p>Error finding selected tokens</p>';
-        return;
-      }
-      
-      const token1Balance = formatTokenBalance(token1.amount, token1.decimals);
-      const token2Balance = formatTokenBalance(token2.amount, token2.decimals);
-      
-      const hasPrice1 = token1.price_usd && token1.value_usd;
-      const hasPrice2 = token2.price_usd && token2.value_usd;
-      
-      const info1 = getTokenInfo(token1.symbol);
-      const info2 = getTokenInfo(token2.symbol);
-      
-      let comparisonHtml = `
-        <div class="comparison-container">
-          <div class="comparison-card">
-            <div class="token-header">
-              ${info1.logo ? `<img src="${info1.logo}" class="token-logo" onerror="this.style.display='none'">` : ''}
-              <h4 style="color: ${info1.color};">${token1.symbol}</h4>
+      });
+
+      document.getElementById('fetch-btn').addEventListener('click', fetchBalances);
+
+      document.getElementById('compare-btn').addEventListener('click', () => {
+        const token1 = document.getElementById('token1-select').value;
+        const token2 = document.getElementById('token2-select').value;
+        if (token1 && token2) {
+          const t1 = currentTokenData.find(t => t.symbol === token1);
+          const t2 = currentTokenData.find(t => t.symbol === token2);
+          document.getElementById('comparison-result').innerHTML = `
+            <div class="comparison-card">
+              <h4>${t1.symbol}</h4>
+              <p>Balance: ${formatTokenBalance(t1.balance, t1.decimals)}</p>
+              <p>Value: ${formatUSD(t1.value_usd)}</p>
             </div>
-            <div class="token-name">${info1.name}</div>
-            <p><strong>Balance:</strong> ${token1Balance}</p>
-            ${hasPrice1 ? `
-              <p><strong>Price:</strong> ${formatUSD(token1.price_usd)}</p>
-              <p><strong>Value:</strong> ${formatUSD(token1.value_usd)}</p>
-            ` : '<p>No price data available</p>'}
-            <p><strong>Last Updated:</strong> ${token1.date}</p>
-          </div>
-          <div class="comparison-card">
-            <div class="token-header">
-              ${info2.logo ? `<img src="${info2.logo}" class="token-logo" onerror="this.style.display='none'">` : ''}
-              <h4 style="color: ${info2.color};">${token2.symbol}</h4>
+            <div class="comparison-card">
+              <h4>${t2.symbol}</h4>
+              <p>Balance: ${formatTokenBalance(t2.balance, t2.decimals)}</p>
+              <p>Value: ${formatUSD(t2.value_usd)}</p>
             </div>
-            <div class="token-name">${info2.name}</div>
-            <p><strong>Balance:</strong> ${token2Balance}</p>
-            ${hasPrice2 ? `
-              <p><strong>Price:</strong> ${formatUSD(token2.price_usd)}</p>
-              <p><strong>Value:</strong> ${formatUSD(token2.value_usd)}</p>
-            ` : '<p>No price data available</p>'}
-            <p><strong>Last Updated:</strong> ${token2.date}</p>
-          </div>
-        </div>
-      `;
-      
-      // Add comparison insights if both tokens have price data
-      if (hasPrice1 && hasPrice2) {
-        const priceDiff = ((token1.price_usd / token2.price_usd) - 1) * 100;
-        const valueDiff = ((token1.value_usd / token2.value_usd) - 1) * 100;
-        
-        comparisonHtml += `
-          <div class="comparison-insights">
-            <h4>Comparison Insights</h4>
-            <p><strong>${token1.symbol} vs ${token2.symbol} Price Ratio:</strong> 
-              1 ${token1.symbol} = ${(token1.price_usd / token2.price_usd).toFixed(6)} ${token2.symbol}
-            </p>
-            <p><strong>Price Difference:</strong> 
-              ${token1.symbol} is ${Math.abs(priceDiff).toFixed(2)}% ${priceDiff > 0 ? 'higher' : 'lower'} than ${token2.symbol}
-            </p>
-            <p><strong>Value Difference:</strong> 
-              Your ${token1.symbol} holding is worth ${Math.abs(valueDiff).toFixed(2)}% ${valueDiff > 0 ? 'more' : 'less'} than your ${token2.symbol} holding
-            </p>
-          </div>
-        `;
-      }
-      
-      document.getElementById('comparison-result').innerHTML = comparisonHtml;
-    });
-    
-    // Fetch balances function
-    async function fetchBalances() {
-      console.log('fetchBalances called');
-      const address = document.getElementById('address').value;
-      console.log('Address:', address);
-      
-      const jsonContainer = document.getElementById('json-response');
-      const tokenGrid = document.getElementById('token-grid');
-      
-      if (!address) {
-        console.log('No address provided');
-        jsonContainer.textContent = 'Please enter an Ethereum address';
-        tokenGrid.innerHTML = '<p>Please enter an Ethereum address</p>';
-        return;
-      }
-      
-      console.log('Setting loading state');
-      jsonContainer.textContent = 'Loading...';
-      tokenGrid.innerHTML = '<p class="loading">Loading token data...</p>';
-      
-      try {
-        console.log('Fetching data from API for address:', address);
-        const apiUrl = `/api/balances/${address}`;
-        console.log('API URL:', apiUrl);
-        
-        const response = await fetch(apiUrl);
-        console.log('Response status:', response.status);
-        
-        const result = await response.json();
-        console.log('API response received:', result);
-        
-        // Store token data globally
-        currentTokenData = result.data || [];
-        
-        // Display raw JSON
-        jsonContainer.textContent = JSON.stringify(result, null, 2);
-        
-        // Create token visualization
-        if (result.data && result.data.length > 0) {
-          let tokensHtml = '';
-          let totalValueUSD = 0;
-          
-          // Add summary at the top if we have value data
-          const tokensWithValue = result.data.filter(token => token.price_usd && token.value_usd);
-          if (tokensWithValue.length > 0) {
-            totalValueUSD = tokensWithValue.reduce((sum, token) => sum + token.value_usd, 0);
-            tokensHtml += `
-              <div class="summary-card">
-                <div style="font-size: 1.3em; font-weight: bold;">Portfolio Summary</div>
-                <div class="summary-value">${formatUSD(totalValueUSD)}</div>
-                <div>Tokens with price data: ${tokensWithValue.length} of ${result.data.length}</div>
-              </div>
-            `;
-          }
-          
-          // Add individual token cards
-          result.data.forEach(token => {
-            const formattedBalance = formatTokenBalance(token.amount, token.decimals);
-            const contractAddr = token.contract;
-            const hasValue = token.price_usd && token.value_usd;
-            const info = getTokenInfo(token.symbol);
-            
-            tokensHtml += `
-              <div class="token-card">
-                <div class="token-header">
-                  ${info.logo ? `<img src="${info.logo}" class="token-logo" onerror="this.style.display='none'">` : ''}
-                  <div class="token-symbol">${token.symbol || 'Unknown'}</div>
-                </div>
-                <div class="token-name">${info.name}</div>
-                <div class="token-balance">
-                  <span class="token-value">${formattedBalance}</span>
-                </div>
-                ${hasValue ? `
-                  <div style="margin: 5px 0;">
-                    <span style="color: #4CAF50;">${formatUSD(token.value_usd)}</span>
-                    ${token.low_liquidity ? '<span class="badge badge-low">Low Liquidity</span>' : ''}
-                  </div>
-                  <div class="token-price">Price: ${formatUSD(token.price_usd)}</div>
-                ` : '<div style="color: #999; font-size: 0.8em;">No price data available</div>'}
-                <div class="token-meta">
-                  <span>Updated: ${token.date}</span>
-                </div>
-                <div style="font-size: 0.7em; color: #666; margin-top: 5px;">
-                  Contract: ${contractAddr.substring(0, 6)}...${contractAddr.substring(38)}
-                </div>
-              </div>
-            `;
-          });
-          
-          tokenGrid.innerHTML = tokensHtml;
-          
-          // Show pagination info if available
-          if (result.pagination) {
-            const paginationInfo = document.createElement('div');
-            paginationInfo.style.gridColumn = '1 / -1';
-            paginationInfo.style.marginTop = '20px';
-            paginationInfo.style.textAlign = 'center';
-            paginationInfo.innerHTML = `
-              <p>Showing page ${result.pagination.current_page} of ${result.pagination.total_pages} 
-              (${result.results} of ${result.total_results} tokens)</p>
-            `;
-            tokenGrid.appendChild(paginationInfo);
-          }
-          
-          // Update token comparison dropdowns
-          const token1Select = document.getElementById('token1-select');
-          const token2Select = document.getElementById('token2-select');
-          
-          // Clear existing options
-          token1Select.innerHTML = '<option value="">Select first token</option>';
-          token2Select.innerHTML = '<option value="">Select second token</option>';
-          
-          // Add options for each token
-          result.data.forEach(token => {
-            const option1 = document.createElement('option');
-            option1.value = token.contract;
-            option1.textContent = token.symbol;
-            token1Select.appendChild(option1);
-            
-            const option2 = document.createElement('option');
-            option2.value = token.contract;
-            option2.textContent = token.symbol;
-            token2Select.appendChild(option2);
-          });
-          
-          // Render portfolio chart if on portfolio tab
-          if (document.querySelector('.tab[data-tab="portfolio"]').classList.contains('active')) {
-            renderPortfolioChart();
-          }
-        } else if (result.error) {
-          tokenGrid.innerHTML = `<p>Error: ${result.error}</p>`;
-        } else {
-          tokenGrid.innerHTML = '<p>No tokens found for this address</p>';
+          `;
         }
-      } catch (error) {
-        jsonContainer.textContent = `Error: ${error.message}`;
-        tokenGrid.innerHTML = `<p>Error: ${error.message}</p>`;
-      }
-    }
-    
-    // Add event listener to fetch button
-    document.getElementById('fetch-btn').addEventListener('click', fetchBalances);
+      });
+    });
+  </script>
+</body>
+</html>
