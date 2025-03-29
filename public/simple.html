@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Token API Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .tab {
+      padding: 10px;
+      background-color: #f1f1f1;
+      display: inline-block;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .tab.active {
+      background-color: #ccc;
+    }
+    .tab-content {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple Token API Demo</h1>
+  
+  <div>
+    <h2>Get Token Balances</h2>
+    <input type="text" id="address" value="0x28c6c06298d514db089934071355e5743bf21d60" style="width: 400px;">
+    <button id="fetch-btn">Fetch Balances</button>
+    
+    <div>
+      <p>Try these addresses:</p>
+      <button onclick="document.getElementById('address').value='0x28c6c06298d514db089934071355e5743bf21d60'">Binance Hot Wallet</button>
+      <button onclick="document.getElementById('address').value='0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'">Coinbase Wallet</button>
+    </div>
+  </div>
+  
+  <div style="margin-top: 20px;">
+    <div class="tabs">
+      <div class="tab active" onclick="openTab('tab1')">Token List</div>
+      <div class="tab" onclick="openTab('tab2')">Raw JSON</div>
+    </div>
+    
+    <div id="tab1" class="tab-content active">
+      <div id="token-list">
+        <p>Token data will appear here</p>
+      </div>
+    </div>
+    
+    <div id="tab2" class="tab-content">
+      <pre id="json-response">Results will appear here</pre>
+    </div>
+  </div>
+  
+  <script>
+    // Simple tab functionality
+    function openTab(tabId) {
+      console.log('Opening tab:', tabId);
+      
+      // Hide all tab content
+      const tabContents = document.getElementsByClassName('tab-content');
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove('active');
+      }
+      
+      // Remove active class from all tabs
+      const tabs = document.getElementsByClassName('tab');
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove('active');
+      }
+      
+      // Show the selected tab content
+      document.getElementById(tabId).classList.add('active');
+      
+      // Add active class to the clicked tab
+      const clickedTab = document.querySelector(`.tab[onclick="openTab('${tabId}')"]`);
+      if (clickedTab) {
+        clickedTab.classList.add('active');
+      }
+    }
+    
+    // Fetch balances function
+    document.getElementById('fetch-btn').addEventListener('click', async function() {
+      console.log('Fetch button clicked');
+      
+      const address = document.getElementById('address').value;
+      const jsonContainer = document.getElementById('json-response');
+      const tokenList = document.getElementById('token-list');
+      
+      if (!address) {
+        jsonContainer.textContent = 'Please enter an Ethereum address';
+        tokenList.innerHTML = '<p>Please enter an Ethereum address</p>';
+        return;
+      }
+      
+      jsonContainer.textContent = 'Loading...';
+      tokenList.innerHTML = '<p>Loading token data...</p>';
+      
+      try {
+        console.log('Fetching data for address:', address);
+        const response = await fetch(`/api/balances/${address}`);
+        console.log('Response status:', response.status);
+        
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        // Display raw JSON
+        jsonContainer.textContent = JSON.stringify(result, null, 2);
+        
+        // Create token list
+        if (result.data && result.data.length > 0) {
+          let tokensHtml = '<ul>';
+          
+          result.data.forEach(token => {
+            const balance = parseFloat(token.amount) / Math.pow(10, token.decimals);
+            tokensHtml += `
+              <li>
+                <strong>${token.symbol || 'Unknown'}</strong> (${token.name || 'Unknown Token'})
+                <br>Balance: ${balance.toFixed(4)}
+                ${token.price_usd ? `<br>Value: $${(token.value_usd).toFixed(2)}` : ''}
+              </li>
+            `;
+          });
+          
+          tokensHtml += '</ul>';
+          tokenList.innerHTML = tokensHtml;
+        } else if (result.error) {
+          tokenList.innerHTML = `<p>Error: ${result.error}</p>`;
+        } else {
+          tokenList.innerHTML = '<p>No tokens found for this address</p>';
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        jsonContainer.textContent = `Error: ${error.message}`;
+        tokenList.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
