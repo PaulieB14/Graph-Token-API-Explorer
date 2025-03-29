@@ -9,6 +9,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static('public'));
 app.use(express.json());
 
+// Serve index.html for the root path
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: './public' });
+});
+
 // The Graph Token API endpoint
 const GRAPH_TOKEN_API_ENDPOINT = 'https://token-api.thegraph.com/balances/evm';
 const GRAPH_API_TOKEN = process.env.GRAPH_API_TOKEN;
