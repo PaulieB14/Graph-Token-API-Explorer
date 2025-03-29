@@ -6,6 +6,17 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001; // Changed to 3001 to avoid conflicts
 
+// Enable CORS for all routes
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    return res.status(200).json({});
+  }
+  next();
+});
+
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
 
@@ -109,6 +120,11 @@ app.get('/api/balances/:address', async (req, res) => {
     console.error('Server error in backward compatibility route:', error);
     res.status(500).json({ error: 'Internal server error', message: error.message });
   }
+});
+
+// Fallback route to serve index.html for any unmatched routes (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server
