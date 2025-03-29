@@ -16,17 +16,19 @@ const GRAPH_API_TOKEN = process.env.GRAPH_API_TOKEN;
 // Network mappings from UI names to API network_id values
 const NETWORK_MAPPINGS = {
   'ethereum': 'mainnet',
-  'eth': 'mainnet'
+  'eth': 'mainnet',
+  'polygon': 'matic',
+  'arbitrum': 'arbitrum-one'
 };
 
 // Valid networks supported by The Graph Token API
 const VALID_NETWORKS = [
-  'mainnet',  // Ethereum mainnet
-  'base',     // Base
-  'bsc',      // Binance Smart Chain
-  'polygon',  // Polygon
-  'arbitrum', // Arbitrum
-  'optimism'  // Optimism
+  'mainnet',      // Ethereum mainnet
+  'base',         // Base
+  'bsc',          // Binance Smart Chain
+  'matic',        // Polygon (uses 'matic' as network_id)
+  'arbitrum-one', // Arbitrum (uses 'arbitrum-one' as network_id)
+  'optimism'      // Optimism
 ];
 
 // Helper to get network_id for API call
@@ -202,8 +204,8 @@ app.get('/api/networks', (req, res) => {
     { id: 'ethereum', name: 'Ethereum Mainnet', api_id: 'mainnet' },
     { id: 'base', name: 'Base', api_id: 'base' },
     { id: 'bsc', name: 'Binance Smart Chain', api_id: 'bsc' },
-    { id: 'polygon', name: 'Polygon', api_id: 'polygon' },
-    { id: 'arbitrum', name: 'Arbitrum', api_id: 'arbitrum' },
+    { id: 'polygon', name: 'Polygon', api_id: 'matic' },
+    { id: 'arbitrum', name: 'Arbitrum', api_id: 'arbitrum-one' },
     { id: 'optimism', name: 'Optimism', api_id: 'optimism' }
   ];
   
