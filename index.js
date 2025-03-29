@@ -313,8 +313,18 @@ app.get('/api/balances/:network/:address', async (req, res) => {
     }
     
     // Make request to The Graph Token API
-    // According to the documentation, the API endpoint doesn't include the network parameter
-    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}`;
+    // Try different URL formats based on The Graph's documentation
+    
+    // Format 1: Standard format without network
+    let apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}`;
+    
+    // Format 2: Include network in URL (some APIs require this)
+    if (network === 'ethereum') {
+      // For Ethereum mainnet, we might need to specify it explicitly
+      const alternateUrl = `${GRAPH_TOKEN_API_ENDPOINT}/ethereum/${address}`;
+      console.log('Alternate API URL (will try if first one fails):', alternateUrl);
+    }
+    
     console.log('API URL:', apiUrl);
     
     const response = await fetch(apiUrl, {
@@ -331,10 +341,45 @@ app.get('/api/balances/:network/:address', async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('API response error:', response.status, errorText);
+      console.error('Requested URL:', apiUrl);
+      console.error('Headers:', {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer TOKEN_PRESENT: ' + !!GRAPH_API_TOKEN
+      });
+      
+      // If we get a 404 and we're using the standard format, try the alternate format with network
+      if (response.status === 404 && network === 'ethereum' && !apiUrl.includes('/ethereum/')) {
+        console.log('Trying alternate URL format with network specified...');
+        apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/ethereum/${address}`;
+        
+        console.log('New API URL:', apiUrl);
+        
+        const alternateResponse = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${GRAPH_API_TOKEN}`
+          }
+        });
+        
+        console.log('Alternate response status:', alternateResponse.status);
+        
+        if (alternateResponse.ok) {
+          const data = await alternateResponse.json();
+          console.log('Alternate URL format successful!');
+          console.log('API Response Data Structure:', JSON.stringify(data, null, 2));
+          return res.json(data);
+        } else {
+          const altErrorText = await alternateResponse.text();
+          console.error('Alternate API response error:', alternateResponse.status, altErrorText);
+        }
+      }
+      
       return res.status(response.status).json({ 
         error: 'Error from The Graph API', 
         status: response.status,
-        details: errorText 
+        details: errorText,
+        requestedUrl: apiUrl
       });
     }
     
