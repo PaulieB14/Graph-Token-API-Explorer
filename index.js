@@ -1,30 +1,54 @@
 require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
-const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3001; // Changed to 3001 to avoid conflicts
-
-// Enable CORS for all routes
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    return res.status(200).json({});
-  }
-  next();
-});
+const PORT = process.env.PORT || 3000;
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
+app.use(express.json());
 
 // The Graph Token API endpoint
 const GRAPH_TOKEN_API_ENDPOINT = 'https://token-api.thegraph.com/balances/evm';
 const GRAPH_API_TOKEN = process.env.GRAPH_API_TOKEN;
 
-// API endpoint to fetch token balances for a given address on a specific network
+// Network mappings from UI names to API network_id values
+const NETWORK_MAPPINGS = {
+  'ethereum': 'mainnet',
+  'eth': 'mainnet'
+};
+
+// Valid networks supported by The Graph Token API
+const VALID_NETWORKS = [
+  'mainnet',  // Ethereum mainnet
+  'base',     // Base
+  'bsc',      // Binance Smart Chain
+  'polygon',  // Polygon
+  'arbitrum', // Arbitrum
+  'optimism'  // Optimism
+];
+
+// Helper to get network_id for API call
+function getApiNetworkId(network) {
+  return NETWORK_MAPPINGS[network] || network;
+}
+
+// Helper for consistent error responses
+function errorResponse(res, status, message, details = null) {
+  const errorObj = {
+    error: message,
+    status: status
+  };
+  
+  if (details) {
+    errorObj.details = details;
+  }
+  
+  return res.status(status).json(errorObj);
+}
+
+// API endpoint to fetch token balances for a given address with network specified
 app.get('/api/balances/:network/:address', async (req, res) => {
   try {
     const { network, address } = req.params;
@@ -32,29 +56,35 @@ app.get('/api/balances/:network/:address', async (req, res) => {
     console.log('API endpoint called with network:', network, 'address:', address);
     console.log('API token available:', !!GRAPH_API_TOKEN);
     
-    // Validate network (for reference only)
-    const validNetworks = ['ethereum', 'base', 'bsc', 'polygon', 'arbitrum', 'optimism'];
-    if (!validNetworks.includes(network)) {
-      console.error('Invalid network:', network);
-      return res.status(400).json({ error: 'Invalid network. Supported networks: ' + validNetworks.join(', ') });
+    if (!GRAPH_API_TOKEN) {
+      return errorResponse(res, 500, 'API token not configured. Please check server configuration.');
     }
     
-    // Validate Ethereum address format (basic validation)
-    if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
-      console.error('Invalid Ethereum address format:', address);
-      return res.status(400).json({ error: 'Invalid Ethereum address format' });
-    }
-
-    console.log('Fetching token balances for address:', address);
+    // Get the appropriate network_id for the API
+    const apiNetworkId = getApiNetworkId(network);
     
-    // Based on the documentation, the API endpoint format is:
-    // https://token-api.thegraph.com/balances/evm/${address}
-    let apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}`;
+    // Validate network
+    if (!VALID_NETWORKS.includes(apiNetworkId)) {
+      console.error('Invalid network:', network, '(mapped to:', apiNetworkId, ')');
+      
+      const validNetworksFormatted = [
+        'ethereum (mainnet)', 
+        ...VALID_NETWORKS.filter(n => n !== 'mainnet')
+      ].join(', ');
+      
+      return errorResponse(res, 400, 'Invalid network', {
+        message: `Supported networks: ${validNetworksFormatted}`,
+        requested: network,
+        valid_networks: VALID_NETWORKS
+      });
+    }
+    
+    // Construct API URL with the correct network_id
+    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}?network_id=${apiNetworkId}`;
+    
     console.log(`Using API URL: ${apiUrl}`);
-    console.log(`Network parameter (for reference only): ${network}`);
     
-    console.log('API URL:', apiUrl);
-    
+    // Make request to The Graph's Token API
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
@@ -63,74 +93,156 @@ app.get('/api/balances/:network/:address', async (req, res) => {
       }
     });
     
-    console.log('Response status:', response.status);
-
-    // Check if response is ok
+    // Handle error responses
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API response error:', response.status, errorText);
-      console.error('Requested URL:', apiUrl);
-      console.error('Headers:', {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer TOKEN_PRESENT: ' + !!GRAPH_API_TOKEN
-      });
+      let errorData;
       
-      return res.status(response.status).json({ 
-        error: 'Error from The Graph API', 
-        status: response.status,
-        details: errorText,
-        requestedUrl: apiUrl
-      });
+      try {
+        // Try to parse error as JSON
+        errorData = await response.json();
+        console.error('API Error:', response.status, JSON.stringify(errorData));
+      } catch (e) {
+        // If not JSON, get error as text
+        const errorText = await response.text();
+        console.error('API Error (non-JSON):', response.status, errorText);
+        errorData = { message: errorText };
+      }
+      
+      return errorResponse(res, response.status, 'API Error', errorData);
     }
     
+    // Parse and return the successful response
     const data = await response.json();
     
-    // Check for errors in the GraphQL response
-    if (data.errors) {
-      console.error('GraphQL errors:', data.errors);
-      return res.status(500).json({ 
-        error: 'Error fetching data from The Graph API',
-        details: data.errors 
-      });
-    }
-
-    // Log the data structure for debugging
-    console.log('API Response Data Structure:', JSON.stringify(data, null, 2));
+    // Enhance the response with additional meta information
+    const enhancedResponse = {
+      ...data,
+      meta: {
+        network: apiNetworkId,
+        original_network_param: network,
+        address: address,
+        timestamp: new Date().toISOString()
+      }
+    };
     
-    // Return the data
-    res.json(data);
+    res.json(enhancedResponse);
   } catch (error) {
-    console.error('Server error:', error);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    console.error('Error fetching balances:', error);
+    return errorResponse(res, 500, 'Internal server error', { message: error.message });
   }
 });
 
-// Backward compatibility route for the old API endpoint format
+// API endpoint to fetch token balances for a given address (defaults to Ethereum mainnet)
 app.get('/api/balances/:address', async (req, res) => {
   try {
     const { address } = req.params;
     
-    // Redirect to the new endpoint format with 'ethereum' as the default network
-    console.log(`Redirecting old API format to new format with default network 'ethereum' for address: ${address}`);
+    console.log('API endpoint called with default network and address:', address);
+    console.log('API token available:', !!GRAPH_API_TOKEN);
     
-    // Forward the request to the new endpoint
-    req.params.network = 'ethereum';
-    app.handle(req, res);
+    if (!GRAPH_API_TOKEN) {
+      return errorResponse(res, 500, 'API token not configured. Please check server configuration.');
+    }
+    
+    // Construct API URL - no network_id means API defaults to Ethereum mainnet
+    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}`;
+    
+    console.log(`Using default API URL: ${apiUrl}`);
+    
+    // Make request to The Graph's Token API
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${GRAPH_API_TOKEN}`
+      }
+    });
+    
+    // Handle error responses
+    if (!response.ok) {
+      let errorData;
+      
+      try {
+        // Try to parse error as JSON
+        errorData = await response.json();
+        console.error('API Error:', response.status, JSON.stringify(errorData));
+      } catch (e) {
+        // If not JSON, get error as text
+        const errorText = await response.text();
+        console.error('API Error (non-JSON):', response.status, errorText);
+        errorData = { message: errorText };
+      }
+      
+      return errorResponse(res, response.status, 'API Error', errorData);
+    }
+    
+    // Parse and return the successful response
+    const data = await response.json();
+    
+    // Enhance the response with additional meta information
+    const enhancedResponse = {
+      ...data,
+      meta: {
+        network: 'mainnet',
+        address: address,
+        timestamp: new Date().toISOString()
+      }
+    };
+    
+    res.json(enhancedResponse);
   } catch (error) {
-    console.error('Server error in backward compatibility route:', error);
-    res.status(500).json({ error: 'Internal server error', message: error.message });
+    console.error('Error fetching balances:', error);
+    return errorResponse(res, 500, 'Internal server error', { message: error.message });
   }
 });
 
-// Fallback route to serve index.html for any unmatched routes (SPA support)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// API endpoint to get a list of supported networks
+app.get('/api/networks', (req, res) => {
+  const networks = [
+    { id: 'ethereum', name: 'Ethereum Mainnet', api_id: 'mainnet' },
+    { id: 'base', name: 'Base', api_id: 'base' },
+    { id: 'bsc', name: 'Binance Smart Chain', api_id: 'bsc' },
+    { id: 'polygon', name: 'Polygon', api_id: 'polygon' },
+    { id: 'arbitrum', name: 'Arbitrum', api_id: 'arbitrum' },
+    { id: 'optimism', name: 'Optimism', api_id: 'optimism' }
+  ];
+  
+  res.json({ networks });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    api_token: !!GRAPH_API_TOKEN,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Catch-all for 404 errors
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `The requested endpoint ${req.path} does not exist.`
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({
+    error: 'Server Error',
+    message: process.env.NODE_ENV === 'production' 
+      ? 'An unexpected error occurred' 
+      : err.message
+  });
 });
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`API endpoints:`);
-  console.log(`- GET /api/balances/:network/:address`);
-  console.log(`- GET /api/balances/:address (backward compatibility, uses ethereum network)`);
+  console.log(`┌─────────────────────────────────────────────┐`);
+  console.log(`│ The Graph Token API Explorer                │`);
+  console.log(`│ Server running at http://localhost:${PORT}      │`);
+  console.log(`│ Token API configured: ${!!GRAPH_API_TOKEN ? '✓' : '✗'}                │`);
+  console.log(`└─────────────────────────────────────────────┘`);
 });

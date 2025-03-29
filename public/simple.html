@@ -3,160 +3,530 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Token API Demo</title>
+  <title>The Graph Token API Explorer</title>
   <style>
+    :root {
+      --primary-color: #2e7d32;
+      --primary-light: #60ad5e;
+      --primary-dark: #005005;
+      --secondary-color: #64b5f6;
+      --text-dark: #212121;
+      --text-light: #fafafa;
+      --background-light: #f5f5f5;
+      --background-card: #ffffff;
+      --border-color: #e0e0e0;
+      --error-color: #d32f2f;
+      --warning-color: #f57c00;
+      --success-color: #388e3c;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-dark);
+      background-color: var(--background-light);
+      padding: 0;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
     }
+    
+    header {
+      background-color: var(--primary-color);
+      color: var(--text-light);
+      padding: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+    
+    header p {
+      margin-top: 5px;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    main {
+      margin-top: 30px;
+    }
+    
+    .card {
+      background-color: var(--background-card);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--primary-color);
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    @media (max-width: 768px) {
+      .input-group {
+        flex-direction: column;
+      }
+    }
+    
+    .input-control {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 16px;
+      color: var(--text-dark);
+      background-color: #fff;
+      transition: border 0.2s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+    }
+    
     button {
-      padding: 10px;
-      background-color: #4CAF50;
+      background-color: var(--primary-color);
       color: white;
       border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 16px;
       cursor: pointer;
-      margin: 5px;
+      transition: background-color 0.2s;
     }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .sample-addresses {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .sample-addresses button {
+      background-color: #f0f0f0;
+      color: var(--text-dark);
+      margin: 4px;
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+    
+    .sample-addresses button:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+    }
+    
     .tab {
-      padding: 10px;
-      background-color: #f1f1f1;
-      display: inline-block;
+      padding: 12px 24px;
       cursor: pointer;
-      margin-right: 5px;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      transition: all 0.2s;
     }
+    
     .tab.active {
-      background-color: #ccc;
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
     }
+    
+    .tab:hover:not(.active) {
+      background-color: rgba(0,0,0,0.03);
+    }
+    
     .tab-content {
       display: none;
-      padding: 20px;
-      border: 1px solid #ccc;
     }
+    
     .tab-content.active {
       display: block;
     }
+    
     pre {
-      background-color: #f5f5f5;
-      padding: 10px;
+      background-color: #f8f8f8;
+      padding: 16px;
+      border-radius: 4px;
       overflow: auto;
+      font-size: 14px;
+      color: #333;
+      white-space: pre-wrap;
+    }
+    
+    .token-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-gap: 16px;
+    }
+    
+    .token-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .token-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .token-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: var(--primary-color);
+    }
+    
+    .token-symbol {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+    
+    .token-name {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .token-balance {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    
+    .token-value {
+      color: var(--success-color);
+      font-weight: 600;
+    }
+    
+    .token-meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #777;
+    }
+    
+    .token-meta div {
+      margin-bottom: 4px;
+    }
+    
+    .summary-card {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .loading {
+      color: #666;
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .error {
+      color: var(--error-color);
+      background-color: #ffebee;
+      padding: 16px;
+      border-radius: 4px;
+      border-left: 4px solid var(--error-color);
+      margin-bottom: 16px;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-left-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    footer {
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <h1>Simple Token API Demo</h1>
-  
-  <div>
-    <h2>Get Token Balances</h2>
-    <input type="text" id="address" value="0x28c6c06298d514db089934071355e5743bf21d60" style="width: 400px;">
-    <button id="fetch-btn">Fetch Balances</button>
-    
-    <div>
-      <p>Try these addresses:</p>
-      <button onclick="document.getElementById('address').value='0x28c6c06298d514db089934071355e5743bf21d60'">Binance Hot Wallet</button>
-      <button onclick="document.getElementById('address').value='0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503'">Coinbase Wallet</button>
+  <header>
+    <div class="container">
+      <h1>The Graph Token API Explorer</h1>
+      <p>View token balances across multiple EVM networks</p>
     </div>
-  </div>
+  </header>
   
-  <div style="margin-top: 20px;">
-    <div class="tabs">
-      <div class="tab active" onclick="openTab('tab1')">Token List</div>
-      <div class="tab" onclick="openTab('tab2')">Raw JSON</div>
-    </div>
-    
-    <div id="tab1" class="tab-content active">
-      <div id="token-list">
-        <p>Token data will appear here</p>
+  <main class="container">
+    <div class="card">
+      <div class="card-title">Check Token Balances</div>
+      
+      <div class="input-group">
+        <div class="input-control">
+          <input type="text" id="address" placeholder="Enter Ethereum address" value="0x28c6c06298d514db089934071355e5743bf21d60">
+        </div>
+        
+        <div class="input-control" style="max-width: 200px;">
+          <select id="network-select">
+            <option value="mainnet">Ethereum (Mainnet)</option>
+            <option value="base">Base</option>
+            <option value="polygon">Polygon</option>
+            <option value="arbitrum">Arbitrum</option>
+            <option value="optimism">Optimism</option>
+            <option value="bsc">BSC</option>
+          </select>
+        </div>
+        
+        <button id="fetch-btn">Fetch Balances</button>
+      </div>
+      
+      <div class="sample-addresses">
+        <p><strong>Try these sample addresses:</strong></p>
+        <div>
+          <button onclick="setAddress('0x28c6c06298d514db089934071355e5743bf21d60')">Binance Hot Wallet</button>
+          <button onclick="setAddress('0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503')">Coinbase Wallet</button>
+          <button onclick="setAddress('0xbe0eb53f46cd790cd13851d5eff43d12404d33e8')">Binance Wallet 3</button>
+          <button onclick="setAddress('0xc6b0562605d35ee710138402b878ffe6f2e23807')">LINK Whale</button>
+          <button onclick="setAddress('0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208')">Sample Wallet</button>
+        </div>
       </div>
     </div>
     
-    <div id="tab2" class="tab-content">
-      <pre id="json-response">Results will appear here</pre>
-    </div>
-  </div>
-  
-  <script>
-    // Simple tab functionality
-    function openTab(tabId) {
-      console.log('Opening tab:', tabId);
+    <div id="results-container" style="display: none;">
+      <div class="tabs">
+        <div class="tab active" onclick="openTab('token-tab')">Tokens</div>
+        <div class="tab" onclick="openTab('json-tab')">Raw JSON</div>
+      </div>
       
-      // Hide all tab content
-      const tabContents = document.getElementsByClassName('tab-content');
-      for (let i = 0; i < tabContents.length; i++) {
-        tabContents[i].classList.remove('active');
-      }
+      <div id="token-tab" class="tab-content active">
+        <div id="token-results">
+          <!-- Token results will be displayed here -->
+        </div>
+      </div>
+      
+      <div id="json-tab" class="tab-content">
+        <pre id="json-results"></pre>
+      </div>
+    </div>
+  </main>
+
+  <footer class="container">
+    <p>Powered by The Graph Token API • Created with 💚 for the Ethereum community</p>
+  </footer>
+
+  <script>
+    // Helper function to set address values
+    function setAddress(address) {
+      document.getElementById('address').value = address;
+    }
+    
+    // Tab switching functionality
+    function openTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
       
       // Remove active class from all tabs
-      const tabs = document.getElementsByClassName('tab');
-      for (let i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove('active');
-      }
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
       
-      // Show the selected tab content
+      // Show selected tab content
       document.getElementById(tabId).classList.add('active');
       
-      // Add active class to the clicked tab
-      const clickedTab = document.querySelector(`.tab[onclick="openTab('${tabId}')"]`);
-      if (clickedTab) {
-        clickedTab.classList.add('active');
+      // Add active class to clicked tab
+      const tabButton = document.querySelector(`.tab[onclick="openTab('${tabId}')"]`);
+      if (tabButton) {
+        tabButton.classList.add('active');
       }
     }
     
-    // Fetch balances function
+    // Format numbers for display
+    function formatNumber(num, decimals = 4) {
+      if (num === null || num === undefined || isNaN(num)) return '0';
+      
+      // For very small numbers, use scientific notation
+      if (Math.abs(num) < 0.00001) return num.toExponential(4);
+      
+      // For small numbers, show more decimals
+      if (Math.abs(num) < 0.0001) return num.toFixed(8);
+      if (Math.abs(num) < 0.01) return num.toFixed(6);
+      
+      // For large numbers, use K, M, B notation
+      if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+      if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+      if (num >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+      
+      return num.toFixed(decimals);
+    }
+    
+    // Fetch token balances
     document.getElementById('fetch-btn').addEventListener('click', async function() {
-      console.log('Fetch button clicked');
+      const address = document.getElementById('address').value.trim();
+      const network = document.getElementById('network-select').value;
+      const resultsContainer = document.getElementById('results-container');
+      const tokenResults = document.getElementById('token-results');
+      const jsonResults = document.getElementById('json-results');
       
-      const address = document.getElementById('address').value;
-      const jsonContainer = document.getElementById('json-response');
-      const tokenList = document.getElementById('token-list');
-      
+      // Validate address
       if (!address) {
-        jsonContainer.textContent = 'Please enter an Ethereum address';
-        tokenList.innerHTML = '<p>Please enter an Ethereum address</p>';
+        alert('Please enter an Ethereum address');
         return;
       }
       
-      jsonContainer.textContent = 'Loading...';
-      tokenList.innerHTML = '<p>Loading token data...</p>';
+      // Show results container
+      resultsContainer.style.display = 'block';
+      
+      // Show loading state
+      tokenResults.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div> Loading token data for address ${address.slice(0, 6)}...${address.slice(-4)}
+        </div>
+      `;
+      jsonResults.textContent = 'Loading...';
       
       try {
-        console.log('Fetching data for address:', address);
-        const response = await fetch(`/api/balances/${address}`);
-        console.log('Response status:', response.status);
+        // Make API request
+        console.log(`Fetching tokens for ${address} on network ${network}`);
+        const response = await fetch(`/api/balances/${network}/${address}`);
+        const data = await response.json();
         
-        const result = await response.json();
-        console.log('Response data:', result);
+        // Display raw JSON data
+        jsonResults.textContent = JSON.stringify(data, null, 2);
         
-        // Display raw JSON
-        jsonContainer.textContent = JSON.stringify(result, null, 2);
-        
-        // Create token list
-        if (result.data && result.data.length > 0) {
-          let tokensHtml = '<ul>';
-          
-          result.data.forEach(token => {
-            const balance = parseFloat(token.amount) / Math.pow(10, token.decimals);
-            tokensHtml += `
-              <li>
-                <strong>${token.symbol || 'Unknown'}</strong> (${token.name || 'Unknown Token'})
-                <br>Balance: ${balance.toFixed(4)}
-                ${token.price_usd ? `<br>Value: $${(token.value_usd).toFixed(2)}` : ''}
-              </li>
-            `;
-          });
-          
-          tokensHtml += '</ul>';
-          tokenList.innerHTML = tokensHtml;
-        } else if (result.error) {
-          tokenList.innerHTML = `<p>Error: ${result.error}</p>`;
-        } else {
-          tokenList.innerHTML = '<p>No tokens found for this address</p>';
+        // Handle API errors
+        if (data.error) {
+          tokenResults.innerHTML = `
+            <div class="error">
+              <strong>Error:</strong> ${data.error.message || JSON.stringify(data.error)}
+            </div>
+          `;
+          return;
         }
+        
+        // Check if we have token data
+        if (!data.data || data.data.length === 0) {
+          tokenResults.innerHTML = `
+            <div class="error">
+              No tokens found for this address on ${network} network
+            </div>
+          `;
+          return;
+        }
+        
+        // Calculate summary statistics
+        const totalTokens = data.data.length;
+        const tokensWithPrice = data.data.filter(t => t.price_usd).length;
+        const totalValue = data.data.reduce((sum, token) => sum + (token.value_usd || 0), 0);
+        
+        // Create summary card
+        let html = `
+          <div class="summary-card">
+            <h3>Summary</h3>
+            <p>Found ${totalTokens} tokens (${tokensWithPrice} with price data)</p>
+            <p>Total Value: $${formatNumber(totalValue, 2)}</p>
+            <p>Network: ${network}</p>
+          </div>
+        `;
+        
+        // Create token cards
+        html += '<ul class="token-list">';
+        
+        data.data.forEach(token => {
+          // Handle token data
+          const decimals = token.decimals || 18;
+          const balance = parseFloat(token.amount) / Math.pow(10, decimals);
+          const symbol = token.symbol || 'Unknown';
+          const name = token.name || symbol;
+          const contract = token.contract || 'Native Token';
+          
+          // Calculate value if price exists
+          let valueHtml = '';
+          if (token.price_usd) {
+            const value = token.value_usd || (balance * token.price_usd);
+            valueHtml = `<div class="token-value">$${formatNumber(value, 2)}</div>`;
+          }
+          
+          // Add token card
+          html += `
+            <li class="token-card">
+              <div class="token-symbol">${symbol}</div>
+              <div class="token-name">${name}</div>
+              <div class="token-balance">${formatNumber(balance, 6)} ${symbol}</div>
+              ${valueHtml}
+              <div class="token-meta">
+                <div>Network: ${token.network_id || network}</div>
+                <div>Contract: ${contract.slice(0, 10)}...${contract.slice(-8)}</div>
+              </div>
+            </li>
+          `;
+        });
+        
+        html += '</ul>';
+        tokenResults.innerHTML = html;
+        
       } catch (error) {
-        console.error('Error fetching data:', error);
-        jsonContainer.textContent = `Error: ${error.message}`;
-        tokenList.innerHTML = `<p>Error: ${error.message}</p>`;
+        console.error('Error fetching token data:', error);
+        tokenResults.innerHTML = `
+          <div class="error">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        `;
+        jsonResults.textContent = `Error: ${error.message}`;
       }
     });
   </script>
