@@ -5,13 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Graph Token API Explorer</title>
   <style>
+    :root {
+      /* Light theme (default) */
+      --bg-color: #f8f9fa;
+      --text-color: #333;
+      --card-bg: white;
+      --card-border: #ddd;
+      --card-shadow: rgba(0,0,0,0.05);
+      --primary-color: #6747ED;
+      --secondary-color: #5438D2;
+      --input-bg: white;
+      --input-border: #ccc;
+      --token-card-bg: #f9f9f9;
+      --token-card-hover-bg: white;
+      --tab-hover-bg: rgba(103, 71, 237, 0.05);
+      --code-bg: #f5f5f5;
+      --quick-btn-bg: #f0f0f0;
+      --quick-btn-color: #333;
+      --quick-btn-border: #ddd;
+      --quick-btn-hover-bg: #e0e0e0;
+      --quick-btn-hover-border: #ccc;
+    }
+    
+    /* Dark theme */
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --card-bg: #1e1e1e;
+      --card-border: #333;
+      --card-shadow: rgba(0,0,0,0.2);
+      --primary-color: #8c6fff;
+      --secondary-color: #7a5fff;
+      --input-bg: #2d2d2d;
+      --input-border: #444;
+      --token-card-bg: #2d2d2d;
+      --token-card-hover-bg: #383838;
+      --tab-hover-bg: rgba(140, 111, 255, 0.1);
+      --code-bg: #2d2d2d;
+      --quick-btn-bg: #2d2d2d;
+      --quick-btn-color: #e0e0e0;
+      --quick-btn-border: #444;
+      --quick-btn-hover-bg: #383838;
+      --quick-btn-hover-border: #555;
+    }
+    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--text-color);
+      background-color: var(--bg-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     header {
       margin-bottom: 30px;
@@ -30,27 +75,29 @@
       gap: 25px;
     }
     .card {
-      border: 1px solid #ddd;
+      border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      background-color: white;
+      box-shadow: 0 4px 12px var(--card-shadow);
+      background-color: var(--card-bg);
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 16px var(--card-shadow);
     }
     input, select {
       padding: 12px;
       width: 100%;
-      border: 1px solid #ccc;
+      border: 1px solid var(--input-border);
       border-radius: 6px;
       font-size: 1em;
+      background-color: var(--input-bg);
+      color: var(--text-color);
       transition: border-color 0.3s;
     }
     input:focus, select:focus {
-      border-color: #6747ED;
+      border-color: var(--primary-color);
       outline: none;
       box-shadow: 0 0 0 3px rgba(103, 71, 237, 0.2);
     }
@@ -83,23 +130,24 @@
       color: #555;
     }
     .quick-buttons button {
-      background-color: #f0f0f0;
-      color: #333;
-      border: 1px solid #ddd;
+      background-color: var(--quick-btn-bg);
+      color: var(--quick-btn-color);
+      border: 1px solid var(--quick-btn-border);
       padding: 10px 15px;
     }
     .quick-buttons button:hover {
-      background-color: #e0e0e0;
-      border-color: #ccc;
+      background-color: var(--quick-btn-hover-bg);
+      border-color: var(--quick-btn-hover-border);
     }
     pre {
-      background-color: #f5f5f5;
+      background-color: var(--code-bg);
       padding: 15px;
       border-radius: 8px;
       overflow: auto;
       max-height: 400px;
       font-family: 'Courier New', monospace;
-      border: 1px solid #ddd;
+      border: 1px solid var(--card-border);
+      color: var(--text-color);
     }
     .token-grid {
       display: grid;
@@ -108,17 +156,17 @@
       margin-top: 20px;
     }
     .token-card {
-      border: 1px solid #eee;
+      border: 1px solid var(--card-border);
       border-radius: 10px;
       padding: 20px;
-      background-color: #f9f9f9;
+      background-color: var(--token-card-bg);
       transition: all 0.3s;
       position: relative;
     }
     .token-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      background-color: #fff;
+      box-shadow: 0 8px 16px var(--card-shadow);
+      background-color: var(--token-card-hover-bg);
     }
     .token-card::before {
       content: '';
@@ -289,6 +337,11 @@
 </head>
 <body>
   <header>
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+      <button id="theme-toggle" style="padding: 8px 12px; background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border);">
+        <span id="theme-icon">🌙</span> Dark Mode
+      </button>
+    </div>
     <h1>The Graph Token API Explorer</h1>
     <p>Explore token balances and data for EVM addresses</p>
   </header>
@@ -314,6 +367,8 @@
         </div>
       </div>
       <button id="fetch-btn">Fetch Balances</button>
+      
+      <div id="network-info" style="margin-top: 10px; padding: 8px; background-color: var(--quick-btn-bg); border-radius: 6px; color: var(--text-color); border: 1px solid var(--quick-btn-border); display: none;"></div>
       
       <div class="quick-buttons">
         <p>Try these addresses:</p>
@@ -378,7 +433,7 @@
       <div id="weth-analysis" class="tab-content">
         <div class="weth-card">
           <h3 style="color: #627EEA;">Wrapped ETH (WETH) Analysis</h3>
-          <p>Contract: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2</p>
+          <p id="wrapped-token-contract">Contract: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2</p>
           <div class="weth-stats-grid">
             <div class="weth-stat-card">
               <div class="weth-stat-label">Balance</div>
@@ -443,7 +498,11 @@
     async function fetchBalances() {
       const address = document.getElementById('address').value.toLowerCase();
       const network = document.getElementById('network').value;
+      
+      // Note: The Graph Token API currently doesn't support network filtering in the URL
+      // We're keeping the network dropdown for future use, but all data is from Ethereum mainnet
       const endpoint = `/api/balances/${network}/${address}`;
+      
       const options = {
         method: 'GET',
         headers: {
@@ -454,6 +513,13 @@
       // Show loading state
       document.getElementById('token-grid').innerHTML = '<p class="loading">Fetching token data...</p>';
       document.getElementById('json-response').textContent = 'Fetching data...';
+      
+      // Update network info message with more detailed explanation
+      const networkName = document.getElementById('network').options[document.getElementById('network').selectedIndex].text;
+      document.getElementById('network-info').innerHTML = 
+        `<strong>Network:</strong> <strong>${networkName}</strong>
+         <br>API endpoint: https://token-api.thegraph.com/balances/evm/${address}`;
+      document.getElementById('network-info').style.display = 'block';
 
       try {
         const response = await fetch(endpoint, options);
@@ -475,7 +541,8 @@
             balance: token.amount || '0',
             price_usd: token.price_usd || 0, // Placeholder if API doesn't provide price
             value_usd: token.value_usd || (token.price_usd ? (parseFloat(token.amount) / Math.pow(10, token.decimals)) * token.price_usd : 0),
-            contract: token.contract || ''
+            contract: token.contract || '',
+            network_id: token.network_id || 'mainnet'
           }));
 
           // If no price data, add dummy prices for demo (remove this if API provides prices)
@@ -599,12 +666,51 @@
     }
 
     function updateWethAnalysis() {
-      const wethToken = currentTokenData.find(token => 
-        token.contract.toLowerCase() === '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+      // Get the current network
+      const network = document.getElementById('network').value;
+      
+      // Define network-specific wrapped token contract addresses
+      const wrappedTokenAddresses = {
+        'ethereum': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH on Ethereum
+        'base': '0x4200000000000000000000000000000000000006', // WETH on Base
+        'bsc': '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB on BSC
+        'polygon': '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC on Polygon
+        'arbitrum': '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH on Arbitrum
+        'optimism': '0x4200000000000000000000000000000000000006'  // WETH on Optimism
+      };
+      
+      // Update tab title based on network
+      const wrappedTokenSymbols = {
+        'ethereum': 'WETH',
+        'base': 'WETH (Base)',
+        'bsc': 'WBNB',
+        'polygon': 'WMATIC',
+        'arbitrum': 'WETH (Arbitrum)',
+        'optimism': 'WETH (Optimism)'
+      };
+      
+      // Update the tab title
+      document.querySelector('.tab[data-tab="weth-analysis"]').textContent = 
+        wrappedTokenSymbols[network] || 'Wrapped Token';
+      
+      // Update the analysis card title
+      document.querySelector('#weth-analysis h3').textContent = 
+        `${wrappedTokenSymbols[network] || 'Wrapped Token'} Analysis`;
+      
+      // Find the wrapped token for the current network
+      const wrappedTokenAddress = wrappedTokenAddresses[network];
+      
+      // Update the contract address display
+      document.getElementById('wrapped-token-contract').textContent = 
+        `Contract: ${wrappedTokenAddress || 'Not available for this network'}`;
+      
+      const wrappedToken = currentTokenData.find(token => 
+        token.contract.toLowerCase() === wrappedTokenAddress?.toLowerCase()
       );
-      if (wethToken) {
-        document.getElementById('weth-balance').textContent = formatTokenBalance(wethToken.balance, wethToken.decimals);
-        document.getElementById('weth-value').textContent = wethToken.value_usd ? formatUSD(wethToken.value_usd) : 'N/A';
+      
+      if (wrappedToken) {
+        document.getElementById('weth-balance').textContent = formatTokenBalance(wrappedToken.balance, wrappedToken.decimals);
+        document.getElementById('weth-value').textContent = wrappedToken.value_usd ? formatUSD(wrappedToken.value_usd) : 'N/A';
       } else {
         document.getElementById('weth-balance').textContent = '0';
         document.getElementById('weth-value').textContent = '$0.00';
@@ -624,18 +730,102 @@
       if (tabId === 'portfolio' && currentTokenData.length > 0) renderPortfolioChart();
     }
 
+    // Theme toggle functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = document.getElementById('theme-icon');
+      
+      if (html.getAttribute('data-theme') === 'dark') {
+        html.removeAttribute('data-theme');
+        themeToggle.innerHTML = '<span id="theme-icon">🌙</span> Dark Mode';
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = '<span id="theme-icon">☀️</span> Light Mode';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    
     // Event listeners
     document.addEventListener('DOMContentLoaded', () => {
+      // Apply saved theme preference
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById('theme-toggle').innerHTML = '<span id="theme-icon">☀️</span> Light Mode';
+      }
+      
+      // Theme toggle button
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+      
+      // Tab switching
       document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => openTab(tab.dataset.tab));
       });
+      
+      // Fetch balances button
       document.getElementById('fetch-btn').addEventListener('click', fetchBalances);
+      
+      // Network dropdown - update UI when network changes
+      document.getElementById('network').addEventListener('change', () => {
+        // Update the WETH tab title immediately when network changes
+        const network = document.getElementById('network').value;
+        
+        // Define network-specific wrapped token symbols
+        const wrappedTokenSymbols = {
+          'ethereum': 'WETH',
+          'base': 'WETH (Base)',
+          'bsc': 'WBNB',
+          'polygon': 'WMATIC',
+          'arbitrum': 'WETH (Arbitrum)',
+          'optimism': 'WETH (Optimism)'
+        };
+        
+        // Update the tab title
+        const tabElement = document.querySelector('.tab[data-tab="weth-analysis"]');
+        tabElement.textContent = wrappedTokenSymbols[network] || 'Wrapped Token';
+        
+        // Update the contract address in the WETH analysis tab
+        const wrappedTokenAddresses = {
+          'ethereum': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH on Ethereum
+          'base': '0x4200000000000000000000000000000000000006', // WETH on Base
+          'bsc': '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', // WBNB on BSC
+          'polygon': '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC on Polygon
+          'arbitrum': '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH on Arbitrum
+          'optimism': '0x4200000000000000000000000000000000000006'  // WETH on Optimism
+        };
+        
+        // Update the contract address display
+        document.getElementById('wrapped-token-contract').textContent = 
+          `Contract: ${wrappedTokenAddresses[network] || 'Not available for this network'}`;
+        
+        // Update the analysis card title
+        document.querySelector('#weth-analysis h3').textContent = 
+          `${wrappedTokenSymbols[network] || 'Wrapped Token'} Analysis`;
+        
+        // Only update data if we already have token data
+        if (currentTokenData.length > 0) {
+          updateWethAnalysis();
+          
+          if (tabElement.classList.contains('active')) {
+            // If the tab is active, make sure the title is visible
+            setTimeout(() => {
+              tabElement.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }, 100);
+          }
+        }
+      });
+      
+      // Quick buttons for sample addresses
       document.querySelectorAll('.quick-buttons button').forEach(button => {
         button.addEventListener('click', () => {
           document.getElementById('address').value = button.dataset.address;
           fetchBalances();
         });
       });
+      
+      // Token comparison button
       document.getElementById('compare-btn').addEventListener('click', compareTokens);
     });
   </script>

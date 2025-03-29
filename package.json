@@ -1,22 +1,31 @@
 {
-  "name": "graph-token-api-demo",
+  "name": "graph-token-api-explorer",
   "version": "1.0.0",
+  "description": "A web application that demonstrates the usage of The Graph's Token API",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "the-graph",
+    "token-api",
+    "blockchain",
+    "ethereum",
+    "web3"
+  ],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.17"
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

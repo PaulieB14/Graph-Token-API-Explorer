@@ -1,68 +1,117 @@
-# Graph Token API Explorer
+# The Graph Token API Explorer
 
-A web application for exploring token balances and data for Ethereum addresses using The Graph's Token API.
+A modern web application for exploring token balances and data across multiple EVM networks using The Graph's Token API.
+
+![The Graph Token API Explorer](https://i.imgur.com/placeholder.png)
 
 ## Features
 
-- **Token Visualization**: View token balances and values in a clean, card-based interface
-- **Portfolio Analysis**: Analyze portfolio diversification with interactive charts
+- **Token Visualization**: View all tokens owned by an Ethereum address with balances and USD values
+- **Portfolio Analysis**: Analyze portfolio distribution with interactive charts
 - **Token Comparison**: Compare different tokens in your portfolio
-- **Raw JSON**: View the raw API response data
-- **Multiple Wallet Support**: Quickly switch between different Ethereum addresses
+- **Network Support**: Explore tokens across multiple EVM networks (Ethereum, Base, BSC, Polygon, Arbitrum, Optimism)
+- **Wrapped Token Analysis**: View detailed information about wrapped tokens on each network
+- **Dark Mode**: Toggle between light and dark themes for comfortable viewing
+- **Responsive Design**: Works on desktop and mobile devices
 
-## Getting Started
+## Installation
 
 ### Prerequisites
 
 - Node.js (v14 or higher)
 - npm or yarn
 
-### Installation
+### Setup
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/PaulieB14/Graph-Token-API-Explorer.git
-   cd Graph-Token-API-Explorer
+   ```bash
+   git clone https://github.com/yourusername/graph-token-api-explorer.git
+   cd graph-token-api-explorer
    ```
 
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
 
-3. Create a `.env` file in the root directory with your Graph API token:
+3. Create a `.env` file in the root directory with your JWT token from The Graph Market:
    ```
-   GRAPH_API_TOKEN=your_api_token_here
+   GRAPH_API_TOKEN=your_jwt_token_here
    ```
 
 4. Start the development server:
-   ```
-   node index.js
+   ```bash
+   npm start
    ```
 
-5. Open your browser and navigate to `http://localhost:3000`
+5. Open your browser and navigate to:
+   ```
+   http://localhost:3001
+   ```
 
 ## Usage
 
-1. Enter an Ethereum address in the input field or click one of the sample wallet buttons
-2. Click "Fetch Balances" to retrieve token data
-3. View token information in the different tabs:
-   - **Token Visualization**: Card-based view of all tokens
-   - **Portfolio Analysis**: Doughnut chart showing portfolio allocation
-   - **Token Comparison**: Compare any two tokens in your portfolio
-   - **Raw JSON**: View the raw API response
-   - **Features & Ideas**: Explore potential use cases for the API
+1. Enter an Ethereum address in the input field
+2. Select a network from the dropdown menu
+3. Click "Fetch Balances" to retrieve token data
+4. Navigate through the different tabs to explore the data:
+   - **Token Visualization**: View all tokens with balances and values
+   - **Portfolio Analysis**: See portfolio distribution in a pie chart
+   - **Token Comparison**: Compare different tokens in your portfolio
+   - **Wrapped Token Analysis**: View details about wrapped tokens on the selected network
+   - **Raw JSON**: See the raw API response data
 
-## Mock Data
+## API Endpoints
 
-The application includes mock data for testing purposes. To use real data from The Graph's Token API, uncomment the API code in `index.js` and ensure you have a valid API token in your `.env` file.
+The application provides the following API endpoints:
+
+- `GET /api/balances/:network/:address` - Get token balances for a specific address on a specific network
+- `GET /api/balances/:address` - Get token balances for a specific address on Ethereum (backward compatibility)
 
 ## Technologies Used
 
-- **Frontend**: HTML, CSS, JavaScript, Chart.js
-- **Backend**: Node.js, Express
-- **API**: The Graph Token API
+- **Frontend**:
+  - HTML5, CSS3, JavaScript
+  - Chart.js for data visualization
+
+- **Backend**:
+  - Node.js
+  - Express.js
+  - node-fetch for API requests
+
+- **API**:
+  - The Graph Token API
+
+## Dark Mode
+
+The application includes a dark mode feature that can be toggled with the button in the top-right corner. The theme preference is saved in localStorage and will persist between sessions.
+
+## Development
+
+### Project Structure
+
+```
+graph-token-api-explorer/
+├── public/               # Static files
+│   ├── index.html        # Main HTML file
+│   └── styles.css        # CSS styles
+├── .env                  # Environment variables (create this file)
+├── index.js              # Express server and API endpoints
+├── package.json          # Project dependencies
+└── README.md             # Project documentation
+```
+
+### Customizing
+
+- **Adding Networks**: Edit the network dropdown in `public/index.html` and update the `validNetworks` array in `index.js`
+- **Styling**: Modify the CSS variables in `public/index.html` to change the theme colors
+- **Adding Features**: The modular design makes it easy to add new tabs and visualizations
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- [The Graph](https://thegraph.com/) for providing the Token API
+- [Chart.js](https://www.chartjs.org/) for the data visualization tools
