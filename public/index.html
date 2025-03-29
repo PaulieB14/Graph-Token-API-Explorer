@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Graph Token API Explorer</title>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <!-- D3.js for advanced visualizations -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- Dashboard CSS and JS -->
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js"></script>
   <style>
     :root {
       --primary-color: #2e7d32;
@@ -348,12 +355,50 @@
     <div id="results-container" style="display: none;">
       <div class="tabs">
         <div class="tab active" onclick="openTab('token-tab')">Tokens</div>
+        <div class="tab" onclick="openTab('dashboard-tab')">Dashboard</div>
         <div class="tab" onclick="openTab('json-tab')">Raw JSON</div>
       </div>
       
       <div id="token-tab" class="tab-content active">
         <div id="token-results">
           <!-- Token results will be displayed here -->
+        </div>
+      </div>
+      
+      <div id="dashboard-tab" class="tab-content">
+        <div id="dashboard-content">
+          <!-- Dashboard visualizations will be displayed here -->
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-title">Token Distribution</div>
+              <div class="chart-subtitle">Value distribution of top tokens</div>
+              <div id="token-distribution-container"></div>
+            </div>
+          </div>
+          
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-title">Token Value Gauges</div>
+              <div class="chart-subtitle">Current prices of top tokens</div>
+              <div id="token-value-gauges"></div>
+            </div>
+          </div>
+          
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-title">Network Comparison</div>
+              <div class="chart-subtitle">Token values across networks</div>
+              <div id="network-comparison-container"></div>
+            </div>
+          </div>
+          
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-title">Price History (Simulated)</div>
+              <div class="chart-subtitle">7-day price trend for top tokens</div>
+              <div id="price-history-container"></div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -529,6 +574,9 @@
         
         html += '</ul>';
         tokenResults.innerHTML = html;
+        
+        // Update dashboard visualizations
+        updateDashboard(data, network);
         
       } catch (error) {
         console.error('Error fetching token data:', error);
