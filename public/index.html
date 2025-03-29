@@ -41,10 +41,7 @@
       transform: translateY(-5px);
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
-    .input-group {
-      margin-bottom: 20px;
-    }
-    input {
+    input, select {
       padding: 12px;
       width: 100%;
       border: 1px solid #ccc;
@@ -52,7 +49,7 @@
       font-size: 1em;
       transition: border-color 0.3s;
     }
-    input:focus {
+    input:focus, select:focus {
       border-color: #6747ED;
       outline: none;
       box-shadow: 0 0 0 3px rgba(103, 71, 237, 0.2);
@@ -117,7 +114,6 @@
       background-color: #f9f9f9;
       transition: all 0.3s;
       position: relative;
-      overflow: hidden;
     }
     .token-card:hover {
       transform: translateY(-5px);
@@ -197,7 +193,6 @@
       margin-bottom: 15px;
       padding-left: 25px;
       position: relative;
-      line-height: 1.5;
     }
     .features-list li:before {
       content: "•";
@@ -214,17 +209,11 @@
       border-radius: 50%;
       background-color: #f0f0f0;
       object-fit: contain;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .token-header {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
-    }
-    .token-name {
-      font-size: 0.9em;
-      margin-bottom: 8px;
-      color: #666;
     }
     .portfolio-container {
       display: flex;
@@ -265,30 +254,66 @@
       background-color: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-    .pulse-animation {
-      animation: pulse 2s infinite;
+    .weth-card {
+      border: 1px solid #627EEA;
+      border-radius: 12px;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 4px 12px rgba(98, 126, 234, 0.1);
+      margin-bottom: 20px;
     }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+    .weth-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .weth-stat-card {
+      background-color: #f8f9ff;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      border: 1px solid #e0e6ff;
+    }
+    .weth-stat-value {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #627EEA;
+      margin: 5px 0;
+    }
+    .weth-stat-label {
+      font-size: 0.9em;
+      color: #666;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>The Graph Token API Explorer</h1>
-    <p>Explore token balances and data for Ethereum addresses using The Graph's Token API</p>
+    <p>Explore token balances and data for EVM addresses</p>
   </header>
   
   <div class="container">
     <div class="card">
       <h2>Get Token Balances</h2>
-      <div class="input-group">
-        <label for="address">Ethereum Address:</label><br>
-        <input type="text" id="address" placeholder="0x..." value="0x28c6c06298d514db089934071355e5743bf21d60">
+      <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+        <div style="flex: 1;">
+          <label for="network">Network:</label><br>
+          <select id="network">
+            <option value="ethereum">Ethereum</option>
+            <option value="base">Base</option>
+            <option value="bsc">BNB Smart Chain</option>
+            <option value="polygon">Polygon</option>
+            <option value="arbitrum">Arbitrum One</option>
+            <option value="optimism">Optimism</option>
+          </select>
+        </div>
+        <div style="flex: 2;">
+          <label for="address">Wallet Address:</label><br>
+          <input type="text" id="address" placeholder="0x..." value="0x28c6c06298d514db089934071355e5743bf21d60">
+        </div>
       </div>
-      <button id="fetch-btn" class="pulse-animation">Fetch Balances</button>
+      <button id="fetch-btn">Fetch Balances</button>
       
       <div class="quick-buttons">
         <p>Try these addresses:</p>
@@ -303,6 +328,7 @@
         <div class="tab active" data-tab="visualization">Token Visualization</div>
         <div class="tab" data-tab="portfolio">Portfolio Analysis</div>
         <div class="tab" data-tab="compare">Token Comparison</div>
+        <div class="tab" data-tab="weth-analysis">WETH Analysis</div>
         <div class="tab" data-tab="raw">Raw JSON</div>
         <div class="tab" data-tab="features">Features & Ideas</div>
       </div>
@@ -349,17 +375,34 @@
         </div>
       </div>
       
+      <div id="weth-analysis" class="tab-content">
+        <div class="weth-card">
+          <h3 style="color: #627EEA;">Wrapped ETH (WETH) Analysis</h3>
+          <p>Contract: 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2</p>
+          <div class="weth-stats-grid">
+            <div class="weth-stat-card">
+              <div class="weth-stat-label">Balance</div>
+              <div id="weth-balance" class="weth-stat-value">-</div>
+            </div>
+            <div class="weth-stat-card">
+              <div class="weth-stat-label">Value (USD)</div>
+              <div id="weth-value" class="weth-stat-value">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div id="raw" class="tab-content">
         <h3>Raw API Response</h3>
-        <pre id="json-response">Results will appear here...</pre>
+        <pre id="json-response">Click "Fetch Balances" to see data...</pre>
       </div>
       
       <div id="features" class="tab-content">
         <h3>Features & Ideas</h3>
         <ul class="features-list">
-          <li><strong>Portfolio Tracking:</strong> Build a dashboard to track your crypto portfolio across multiple addresses</li>
+          <li><strong>Portfolio Tracking:</strong> Track your crypto portfolio</li>
           <li><strong>Token Discovery:</strong> Find all tokens owned by an address</li>
-          <li><strong>Historical Analysis:</strong> Track token balance changes over time</li>
+          <li><strong>Historical Analysis:</strong> Analyze trading patterns</li>
         </ul>
       </div>
     </div>
@@ -368,31 +411,17 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   
   <script>
-    // Mock token data for different addresses
-    const mockTokenData = {
-      '0x28c6c06298d514db089934071355e5743bf21d60': [
-        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '50000000000000000000', price_usd: 2500 },
-        { symbol: 'USDT', name: 'Tether', decimals: 6, balance: '1000000000', price_usd: 1 },
-        { symbol: 'LINK', name: 'Chainlink', decimals: 18, balance: '200000000000000000000', price_usd: 15 }
-      ],
-      '0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503': [
-        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '30000000000000000000', price_usd: 2500 },
-        { symbol: 'USDC', name: 'USD Coin', decimals: 6, balance: '500000000', price_usd: 1 }
-      ],
-      '0xbe0eb53f46cd790cd13851d5eff43d12404d33e8': [
-        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '100000000000000000000', price_usd: 2500 },
-        { symbol: 'GRT', name: 'The Graph', decimals: 18, balance: '5000000000000000000000', price_usd: 0.2 }
-      ]
-    };
-
-    // Token info for visualization
+    // Token info for visualization (logos and colors)
     const tokenInfo = {
       'ETH': { name: 'Ethereum', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', color: '#627EEA' },
       'USDT': { name: 'Tether', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.png', color: '#26A17B' },
-      'LINK': { name: 'Chainlink', logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png', color: '#2A5ADA' },
       'USDC': { name: 'USD Coin', logo: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', color: '#2775CA' },
-      'GRT': { name: 'The Graph', logo: 'https://cryptologos.cc/logos/the-graph-grt-logo.png', color: '#6747ED' }
+      'GRT': { name: 'The Graph', logo: 'https://cryptologos.cc/logos/the-graph-grt-logo.png', color: '#6747ED' },
+      'WETH': { name: 'Wrapped Ethereum', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png', color: '#627EEA' }
     };
+
+    // JWT Token - Replace with your actual token from The Graph Market
+    const JWT_TOKEN = '<YOUR_JWT_TOKEN>';
 
     let currentTokenData = [];
     let portfolioChart = null;
@@ -403,23 +432,72 @@
     }
 
     function formatTokenBalance(balance, decimals) {
-      return (parseFloat(balance) / Math.pow(10, decimals)).toFixed(4);
+      return (parseFloat(balance) / Math.pow(10, decimals)).toLocaleString('en-US', { maximumFractionDigits: 4 });
     }
 
     function formatUSD(value) {
       return '$' + parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Fetch balances (mock data)
-    function fetchBalances() {
+    // Fetch balances from The Graph Token API
+    async function fetchBalances() {
       const address = document.getElementById('address').value.toLowerCase();
-      currentTokenData = mockTokenData[address] || [
-        { symbol: 'ETH', name: 'Ethereum', decimals: 18, balance: '1000000000000000000', price_usd: 2500 }
-      ];
-      currentTokenData.forEach(token => {
-        token.value_usd = (parseFloat(token.balance) / Math.pow(10, token.decimals)) * token.price_usd;
-      });
-      updateUI();
+      const network = document.getElementById('network').value;
+      const endpoint = `/api/balances/${network}/${address}`;
+      const options = {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      };
+
+      // Show loading state
+      document.getElementById('token-grid').innerHTML = '<p class="loading">Fetching token data...</p>';
+      document.getElementById('json-response').textContent = 'Fetching data...';
+
+      try {
+        const response = await fetch(endpoint, options);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        // Log raw response for debugging
+        console.log('Raw API Response:', data);
+        document.getElementById('json-response').textContent = JSON.stringify(data, null, 2);
+
+        // Process token data
+        if (data && data.data && Array.isArray(data.data)) {
+          currentTokenData = data.data.map(token => ({
+            symbol: token.symbol || 'Unknown',
+            name: token.name || 'Unknown Token',
+            decimals: token.decimals || 18,
+            balance: token.amount || '0',
+            price_usd: token.price_usd || 0, // Placeholder if API doesn't provide price
+            value_usd: token.value_usd || (token.price_usd ? (parseFloat(token.amount) / Math.pow(10, token.decimals)) * token.price_usd : 0),
+            contract: token.contract || ''
+          }));
+
+          // If no price data, add dummy prices for demo (remove this if API provides prices)
+          if (!currentTokenData.some(token => token.price_usd)) {
+            currentTokenData.forEach(token => {
+              if (token.symbol === 'ETH' || token.symbol === 'WETH') token.price_usd = 2500;
+              else if (token.symbol === 'USDT' || token.symbol === 'USDC') token.price_usd = 1;
+              else if (token.symbol === 'GRT') token.price_usd = 0.2;
+              else token.price_usd = 0;
+              token.value_usd = (parseFloat(token.balance) / Math.pow(10, token.decimals)) * token.price_usd;
+            });
+          }
+
+          updateUI();
+        } else {
+          throw new Error('Unexpected response format');
+        }
+      } catch (error) {
+        console.error('Fetch Error:', error);
+        document.getElementById('token-grid').innerHTML = `<p class="loading">Error: ${error.message}</p>`;
+        document.getElementById('json-response').textContent = `Error: ${error.message}`;
+      }
     }
 
     // Update UI across all tabs
@@ -427,6 +505,7 @@
       updateTokenVisualization();
       updatePortfolioAnalysis();
       updateTokenComparison();
+      updateWethAnalysis();
       updateRawJSON();
     }
 
@@ -436,14 +515,14 @@
       currentTokenData.forEach(token => {
         const info = getTokenInfo(token.symbol);
         const balance = formatTokenBalance(token.balance, token.decimals);
-        const value = formatUSD(token.value_usd);
+        const value = token.value_usd ? formatUSD(token.value_usd) : 'N/A';
         grid.innerHTML += `
           <div class="token-card">
             <div class="token-header">
               ${info.logo ? `<img src="${info.logo}" class="token-logo" alt="${token.symbol}">` : ''}
               <div>
                 <div class="token-symbol">${token.symbol}</div>
-                <div class="token-name">${token.name}</div>
+                <div>${token.name}</div>
               </div>
             </div>
             <div class="token-balance">${balance} ${token.symbol}</div>
@@ -455,10 +534,11 @@
 
     function updatePortfolioAnalysis() {
       const insights = document.getElementById('portfolio-insights');
-      const totalValue = currentTokenData.reduce((sum, token) => sum + token.value_usd, 0);
+      const tokensWithValue = currentTokenData.filter(token => token.value_usd);
+      const totalValue = tokensWithValue.reduce((sum, token) => sum + token.value_usd, 0);
       insights.innerHTML = `
         <p><strong>Total Value:</strong> ${formatUSD(totalValue)}</p>
-        <p><strong>Number of Tokens:</strong> ${currentTokenData.length}</p>
+        <p><strong>Number of Tokens:</strong> ${currentTokenData.length} (${tokensWithValue.length} with value)</p>
       `;
       renderPortfolioChart();
     }
@@ -466,13 +546,14 @@
     function renderPortfolioChart() {
       const ctx = document.getElementById('portfolio-chart').getContext('2d');
       if (portfolioChart) portfolioChart.destroy();
+      const tokensWithValue = currentTokenData.filter(token => token.value_usd);
       portfolioChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: currentTokenData.map(token => token.symbol),
+          labels: tokensWithValue.map(token => token.symbol),
           datasets: [{
-            data: currentTokenData.map(token => token.value_usd),
-            backgroundColor: currentTokenData.map(token => getTokenInfo(token.symbol).color),
+            data: tokensWithValue.map(token => token.value_usd),
+            backgroundColor: tokensWithValue.map(token => getTokenInfo(token.symbol).color),
             borderWidth: 1,
             borderColor: '#ffffff'
           }]
@@ -491,9 +572,43 @@
       const token1Select = document.getElementById('token1-select');
       const token2Select = document.getElementById('token2-select');
       token1Select.innerHTML = '<option value="">Select first token</option>' + 
-        currentTokenData.map(token => `<option value="${token.symbol}">${token.symbol}</option>`).join('');
+        currentTokenData.map(token => `<option value="${token.contract}">${token.symbol}</option>`).join('');
       token2Select.innerHTML = '<option value="">Select second token</option>' + 
-        currentTokenData.map(token => `<option value="${token.symbol}">${token.symbol}</option>`).join('');
+        currentTokenData.map(token => `<option value="${token.contract}">${token.symbol}</option>`).join('');
+    }
+
+    function compareTokens() {
+      const token1Id = document.getElementById('token1-select').value;
+      const token2Id = document.getElementById('token2-select').value;
+      if (!token1Id || !token2Id) return;
+      const token1 = currentTokenData.find(t => t.contract === token1Id);
+      const token2 = currentTokenData.find(t => t.contract === token2Id);
+      const result = document.getElementById('comparison-result');
+      result.innerHTML = `
+        <div class="comparison-card">
+          <h4>${token1.symbol}</h4>
+          <p>Balance: ${formatTokenBalance(token1.balance, token1.decimals)}</p>
+          <p>Value: ${token1.value_usd ? formatUSD(token1.value_usd) : 'N/A'}</p>
+        </div>
+        <div class="comparison-card">
+          <h4>${token2.symbol}</h4>
+          <p>Balance: ${formatTokenBalance(token2.balance, token2.decimals)}</p>
+          <p>Value: ${token2.value_usd ? formatUSD(token2.value_usd) : 'N/A'}</p>
+        </div>
+      `;
+    }
+
+    function updateWethAnalysis() {
+      const wethToken = currentTokenData.find(token => 
+        token.contract.toLowerCase() === '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+      );
+      if (wethToken) {
+        document.getElementById('weth-balance').textContent = formatTokenBalance(wethToken.balance, wethToken.decimals);
+        document.getElementById('weth-value').textContent = wethToken.value_usd ? formatUSD(wethToken.value_usd) : 'N/A';
+      } else {
+        document.getElementById('weth-balance').textContent = '0';
+        document.getElementById('weth-value').textContent = '$0.00';
+      }
     }
 
     function updateRawJSON() {
@@ -514,36 +629,14 @@
       document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => openTab(tab.dataset.tab));
       });
-
+      document.getElementById('fetch-btn').addEventListener('click', fetchBalances);
       document.querySelectorAll('.quick-buttons button').forEach(button => {
         button.addEventListener('click', () => {
           document.getElementById('address').value = button.dataset.address;
           fetchBalances();
         });
       });
-
-      document.getElementById('fetch-btn').addEventListener('click', fetchBalances);
-
-      document.getElementById('compare-btn').addEventListener('click', () => {
-        const token1 = document.getElementById('token1-select').value;
-        const token2 = document.getElementById('token2-select').value;
-        if (token1 && token2) {
-          const t1 = currentTokenData.find(t => t.symbol === token1);
-          const t2 = currentTokenData.find(t => t.symbol === token2);
-          document.getElementById('comparison-result').innerHTML = `
-            <div class="comparison-card">
-              <h4>${t1.symbol}</h4>
-              <p>Balance: ${formatTokenBalance(t1.balance, t1.decimals)}</p>
-              <p>Value: ${formatUSD(t1.value_usd)}</p>
-            </div>
-            <div class="comparison-card">
-              <h4>${t2.symbol}</h4>
-              <p>Balance: ${formatTokenBalance(t2.balance, t2.decimals)}</p>
-              <p>Value: ${formatUSD(t2.value_usd)}</p>
-            </div>
-          `;
-        }
-      });
+      document.getElementById('compare-btn').addEventListener('click', compareTokens);
     });
   </script>
 </body>

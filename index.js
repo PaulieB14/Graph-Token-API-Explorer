@@ -13,13 +13,21 @@ app.use(express.static('public'));
 const GRAPH_TOKEN_API_ENDPOINT = 'https://token-api.thegraph.com/balances/evm';
 const GRAPH_API_TOKEN = process.env.GRAPH_API_TOKEN;
 
-// API endpoint to fetch token balances for a given Ethereum address
-app.get('/api/balances/:address', async (req, res) => {
+// API endpoint to fetch token balances for a given address on a specific network
+app.get('/api/balances/:network/:address', async (req, res) => {
   try {
-    const { address } = req.params;
+    const { network, address } = req.params;
     
-    console.log('API endpoint called with address:', address);
+    console.log('API endpoint called with network:', network, 'address:', address);
     console.log('API token available:', !!GRAPH_API_TOKEN);
+    
+    // Validate network (for backward compatibility and future use)
+    // Note: The Graph Token API currently doesn't use network in the URL
+    const validNetworks = ['ethereum', 'base', 'bsc', 'polygon', 'arbitrum', 'optimism'];
+    if (!validNetworks.includes(network)) {
+      console.error('Invalid network:', network);
+      return res.status(400).json({ error: 'Invalid network. Supported networks: ' + validNetworks.join(', ') });
+    }
     
     // Validate Ethereum address format (basic validation)
     if (!address.match(/^0x[a-fA-F0-9]{40}$/)) {
@@ -219,11 +227,93 @@ app.get('/api/balances/:address', async (req, res) => {
       };
     }
     
-    console.log('Returning mock data for address:', address);
-    return res.json(mockData);
+    // Add network-specific tokens to mock data based on the network
+    if (network !== 'ethereum' && mockData) {
+      // Add network-specific tokens
+      const networkTokens = {
+        'base': [
+          {
+            contract: "0x4200000000000000000000000000000000000006",
+            symbol: "WETH",
+            name: "Wrapped Ether (Base)",
+            decimals: 18,
+            amount: "2000000000000000000",
+            date: "2025-03-28",
+            price_usd: 3500.0,
+            value_usd: 7000.0,
+            low_liquidity: false
+          }
+        ],
+        'bsc': [
+          {
+            contract: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+            symbol: "WBNB",
+            name: "Wrapped BNB",
+            decimals: 18,
+            amount: "10000000000000000000",
+            date: "2025-03-28",
+            price_usd: 600.0,
+            value_usd: 6000.0,
+            low_liquidity: false
+          }
+        ],
+        'polygon': [
+          {
+            contract: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+            symbol: "WMATIC",
+            name: "Wrapped Matic",
+            decimals: 18,
+            amount: "5000000000000000000000",
+            date: "2025-03-28",
+            price_usd: 1.2,
+            value_usd: 6000.0,
+            low_liquidity: false
+          }
+        ],
+        'arbitrum': [
+          {
+            contract: "0x912CE59144191C1204E64559FE8253a0e49E6548",
+            symbol: "ARB",
+            name: "Arbitrum",
+            decimals: 18,
+            amount: "10000000000000000000000",
+            date: "2025-03-28",
+            price_usd: 1.5,
+            value_usd: 15000.0,
+            low_liquidity: false
+          }
+        ],
+        'optimism': [
+          {
+            contract: "0x4200000000000000000000000000000000000042",
+            symbol: "OP",
+            name: "Optimism",
+            decimals: 18,
+            amount: "20000000000000000000000",
+            date: "2025-03-28",
+            price_usd: 3.2,
+            value_usd: 64000.0,
+            low_liquidity: false
+          }
+        ]
+      };
+      
+      // Add network-specific tokens to mock data
+      if (networkTokens[network]) {
+        mockData.data = [...mockData.data, ...networkTokens[network]];
+        mockData.results += networkTokens[network].length;
+        mockData.total_results += networkTokens[network].length;
+      }
+    }
     
-    /*
+    // For debugging and testing, use mock data if needed
+    if (process.env.USE_MOCK_DATA === 'true') {
+      console.log(`Returning mock data for network: ${network}, address: ${address}`);
+      return res.json(mockData);
+    }
+    
     // Make request to The Graph Token API
+    // According to the documentation, the API endpoint doesn't include the network parameter
     const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}`;
     console.log('API URL:', apiUrl);
     
@@ -264,9 +354,25 @@ app.get('/api/balances/:address', async (req, res) => {
     
     // Return the data
     res.json(data);
-    */
   } catch (error) {
     console.error('Server error:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// Backward compatibility route for the old API endpoint format
+app.get('/api/balances/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    
+    // Redirect to the new endpoint format with 'ethereum' as the default network
+    console.log(`Redirecting old API format to new format with default network 'ethereum' for address: ${address}`);
+    
+    // Forward the request to the new endpoint
+    req.params.network = 'ethereum';
+    app.handle(req, res);
+  } catch (error) {
+    console.error('Server error in backward compatibility route:', error);
     res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 });
@@ -274,4 +380,7 @@ app.get('/api/balances/:address', async (req, res) => {
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`API endpoints:`);
+  console.log(`- GET /api/balances/:network/:address`);
+  console.log(`- GET /api/balances/:address (backward compatibility, uses ethereum network)`);
 });
