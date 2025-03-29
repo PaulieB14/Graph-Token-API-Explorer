@@ -9,9 +9,92 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static('public'));
 app.use(express.json());
 
+// Import required modules
+const fs = require('fs');
+const path = require('path');
+
 // Serve index.html for the root path
 app.get('/', (req, res) => {
-  res.sendFile('index.html', { root: './public' });
+  try {
+    // Check if we can access the API token
+    const tokenAvailable = !!process.env.GRAPH_API_TOKEN;
+    
+    // Log environment info for debugging
+    console.log('Environment info:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- API Token available:', tokenAvailable);
+    console.log('- Current directory:', process.cwd());
+    
+    // Try multiple possible paths for index.html
+    const possiblePaths = [
+      path.join(process.cwd(), 'public', 'index.html'),
+      path.join(process.cwd(), 'index.html'),
+      path.join(__dirname, 'public', 'index.html'),
+      path.join(__dirname, '..', 'public', 'index.html')
+    ];
+    
+    // Log all possible paths
+    console.log('Checking possible paths for index.html:');
+    possiblePaths.forEach((p, i) => console.log(`- Path ${i+1}:`, p));
+    
+    // Find the first path that exists
+    let indexPath = null;
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        indexPath = p;
+        console.log('Found index.html at:', indexPath);
+        break;
+      }
+    }
+    
+    if (indexPath) {
+      // Serve the file directly using fs.readFile for maximum compatibility
+      fs.readFile(indexPath, 'utf8', (err, data) => {
+        if (err) {
+          console.error('Error reading index.html:', err);
+          return res.status(500).json({
+            error: 'File Read Error',
+            message: err.message
+          });
+        }
+        
+        res.setHeader('Content-Type', 'text/html');
+        res.send(data);
+      });
+    } else {
+      // If no file is found, return a helpful error
+      console.error('index.html not found in any of the checked paths');
+      
+      // Try to list directories to help with debugging
+      let directories = {};
+      try {
+        possiblePaths.forEach(p => {
+          const dir = path.dirname(p);
+          if (fs.existsSync(dir)) {
+            directories[dir] = fs.readdirSync(dir);
+          }
+        });
+      } catch (e) {
+        console.error('Error listing directories:', e);
+      }
+      
+      res.status(500).json({
+        error: 'File Not Found',
+        message: 'Could not find index.html in any of the expected locations',
+        debug: {
+          cwd: process.cwd(),
+          directories
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error serving index.html:', error);
+    res.status(500).json({
+      error: 'Server Error',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'production' ? null : error.stack
+    });
+  }
 });
 
 // The Graph Token API endpoint
@@ -64,7 +147,11 @@ app.get('/api/balances/:network/:address', async (req, res) => {
     console.log('API token available:', !!GRAPH_API_TOKEN);
     
     if (!GRAPH_API_TOKEN) {
-      return errorResponse(res, 500, 'API token not configured. Please check server configuration.');
+      return res.status(401).json({
+        error: 'Authentication Required',
+        message: 'API token not configured. Please add GRAPH_API_TOKEN to your environment variables.',
+        status: 401
+      });
     }
     
     // Get the appropriate network_id for the API
@@ -148,7 +235,11 @@ app.get('/api/balances/:address', async (req, res) => {
     console.log('API token available:', !!GRAPH_API_TOKEN);
     
     if (!GRAPH_API_TOKEN) {
-      return errorResponse(res, 500, 'API token not configured. Please check server configuration.');
+      return res.status(401).json({
+        error: 'Authentication Required',
+        message: 'API token not configured. Please add GRAPH_API_TOKEN to your environment variables.',
+        status: 401
+      });
     }
     
     // Construct API URL - no network_id means API defaults to Ethereum mainnet

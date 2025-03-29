@@ -450,9 +450,20 @@
         
         // Handle API errors
         if (data.error) {
+          let errorMessage = data.message || data.error;
+          
+          // Special handling for authentication errors
+          if (data.status === 401) {
+            errorMessage = `
+              <p>${data.message}</p>
+              <p>This application requires an API token from The Graph to function.</p>
+              <p>The API token must be set as an environment variable named GRAPH_API_TOKEN in your deployment settings.</p>
+            `;
+          }
+          
           tokenResults.innerHTML = `
             <div class="error">
-              <strong>Error:</strong> ${data.error.message || JSON.stringify(data.error)}
+              <strong>Error:</strong> ${errorMessage}
             </div>
           `;
           return;
