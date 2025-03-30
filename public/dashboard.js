@@ -136,8 +136,11 @@ function createTokenValueGauges(tokens) {
   // Clear previous content
   container.innerHTML = '';
   
-  // Filter tokens with price data
-  const tokensWithPrice = tokens.filter(t => t.price_usd && t.price_usd > 0);
+  // Filter tokens with price data and meaningful value
+  const tokensWithPrice = tokens
+    .filter(t => t.price_usd && t.value_usd > 100) // Only tokens with price and meaningful value
+    .sort((a, b) => (b.value_usd || 0) - (a.value_usd || 0))
+    .slice(0, 6); // Limit to top 6 tokens
   
   // If no tokens have price, show message
   if (tokensWithPrice.length === 0) {
@@ -145,93 +148,84 @@ function createTokenValueGauges(tokens) {
     return;
   }
   
-  // Sort tokens by value
-  tokensWithPrice.sort((a, b) => (b.value_usd || 0) - (a.value_usd || 0));
+  // Create a gauge container
+  const gaugesGrid = document.createElement('div');
+  gaugesGrid.className = 'gauges-grid';
+  container.appendChild(gaugesGrid);
   
-  // Take top 3 tokens
-  const topTokens = tokensWithPrice.slice(0, 3);
-  
-  // Create a row for gauges
-  const gaugeRow = document.createElement('div');
-  gaugeRow.className = 'chart-row';
-  container.appendChild(gaugeRow);
-  
-  // Create gauge for each top token
-  topTokens.forEach((token, index) => {
-    // Create card for this gauge
-    const gaugeCard = document.createElement('div');
-    gaugeCard.className = 'chart-card';
-    gaugeRow.appendChild(gaugeCard);
+  // Create each token gauge
+  tokensWithPrice.forEach(token => {
+    const gaugeWrapper = document.createElement('div');
+    gaugeWrapper.className = 'gauge-wrapper';
     
-    // Add title
-    const title = document.createElement('div');
-    title.className = 'chart-title';
-    title.textContent = token.symbol || 'Unknown';
-    gaugeCard.appendChild(title);
+    // Calculate meaningful gauge values
+    const price = token.price_usd;
     
-    // Add subtitle (token name)
-    const subtitle = document.createElement('div');
-    subtitle.className = 'chart-subtitle';
-    subtitle.textContent = token.name || token.symbol || 'Unknown';
-    gaugeCard.appendChild(subtitle);
+    // Set different scales based on token price range
+    let minPrice, maxPrice, thresholds;
     
-    // Create gauge container
-    const gaugeContainer = document.createElement('div');
-    gaugeContainer.className = 'gauge-container';
-    gaugeCard.appendChild(gaugeContainer);
-    
-    // Create canvas for gauge
-    const canvas = document.createElement('canvas');
-    canvas.id = `gauge-${index}`;
-    gaugeContainer.appendChild(canvas);
-    
-    // Create the gauge
-    createGaugeChart(canvas.id, token.price_usd, token.symbol);
-    
-    // Add price label
-    const priceLabel = document.createElement('div');
-    priceLabel.className = 'gauge-label';
-    priceLabel.textContent = `$${formatCurrency(token.price_usd)}`;
-    gaugeCard.appendChild(priceLabel);
-  });
-}
-
-// Helper function to create a gauge chart
-function createGaugeChart(canvasId, value, symbol) {
-  // Determine min and max values based on token price
-  let minValue = 0;
-  let maxValue = value * 2; // Max is double the current price
-  
-  // Create the gauge chart
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      datasets: [{
-        data: [value, maxValue - value],
-        backgroundColor: [getTokenColor(0), '#f0f0f0'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      circumference: 180,
-      rotation: 270,
-      cutout: '70%',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          enabled: false
-        }
-      },
-      animation: {
-        animateRotate: true,
-        animateScale: true
-      }
+    if (price < 0.01) {
+      // Micro-priced tokens
+      minPrice = 0;
+      maxPrice = price * 2; // Set max to double current price
+      thresholds = [0.25, 0.5, 0.75].map(t => t * maxPrice);
+    } else if (price < 1) {
+      // Low-priced tokens
+      minPrice = 0;
+      maxPrice = Math.ceil(price * 1.5 * 100) / 100; // Round to 2 decimal places
+      thresholds = [0.3, 0.6, 0.9].map(t => t * maxPrice);
+    } else if (price < 100) {
+      // Medium-priced tokens
+      minPrice = Math.floor(price * 0.7); // Set min to 70% of current price
+      maxPrice = Math.ceil(price * 1.3); // Set max to 130% of current price
+      thresholds = [
+        minPrice + (maxPrice - minPrice) * 0.33,
+        minPrice + (maxPrice - minPrice) * 0.66,
+        minPrice + (maxPrice - minPrice) * 0.9
+      ];
+    } else {
+      // High-priced tokens
+      minPrice = Math.floor(price * 0.8 / 100) * 100; // Round to nearest 100 below
+      maxPrice = Math.ceil(price * 1.2 / 100) * 100; // Round to nearest 100 above
+      thresholds = [
+        minPrice + (maxPrice - minPrice) * 0.33,
+        minPrice + (maxPrice - minPrice) * 0.66,
+        minPrice + (maxPrice - minPrice) * 0.9
+      ];
     }
+    
+    // Calculate price position as percentage of the range
+    const pricePosition = ((price - minPrice) / (maxPrice - minPrice)) * 100;
+    
+    // Create gauge HTML
+    const decimals = token.decimals || 18;
+    const balance = parseFloat(token.amount) / Math.pow(10, decimals);
+    
+    gaugeWrapper.innerHTML = `
+      <div class="gauge-header">
+        <span class="gauge-symbol">${token.symbol || 'Unknown'}</span>
+        <span class="gauge-price">$${formatCurrency(price, price < 0.01 ? 8 : 4)}</span>
+      </div>
+      <div class="gauge">
+        <div class="gauge-scale">
+          <span class="gauge-min">$${formatCurrency(minPrice, 2)}</span>
+          <span class="gauge-max">$${formatCurrency(maxPrice, 2)}</span>
+        </div>
+        <div class="gauge-bar">
+          <div class="gauge-fill" style="width: ${pricePosition}%"></div>
+          <div class="gauge-marker" style="left: ${pricePosition}%"></div>
+        </div>
+        <div class="gauge-ticks">
+          ${thresholds.map(t => `<div class="gauge-tick" style="left: ${((t - minPrice) / (maxPrice - minPrice)) * 100}%"></div>`).join('')}
+        </div>
+      </div>
+      <div class="gauge-info">
+        <span>${formatCurrency(token.value_usd, 2)} USD value</span>
+        <span>${formatCurrency(balance, 6)} ${token.symbol}</span>
+      </div>
+    `;
+    
+    gaugesGrid.appendChild(gaugeWrapper);
   });
 }
 
