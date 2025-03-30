@@ -251,6 +251,17 @@ function createNetworkComparisonChart(tokens) {
     networkGroups[network].tokenCount += 1;
   });
   
+  // If we have a total_results value from pagination, use it for the main network
+  if (tokenData && tokenData.meta && tokenData.meta.total_results) {
+    // Get the main network (the one we're viewing)
+    const mainNetwork = currentNetwork;
+    
+    // If we have this network in our groups, update its token count
+    if (networkGroups[mainNetwork]) {
+      networkGroups[mainNetwork].tokenCount = tokenData.meta.total_results;
+    }
+  }
+  
   // If no networks, show message
   if (Object.keys(networkGroups).length === 0) {
     container.innerHTML = '<div class="no-data-message">No network data available</div>';

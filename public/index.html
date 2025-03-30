@@ -609,7 +609,14 @@
           displayTokens(data, network);
           
           // Update dashboard visualizations with all tokens
-          updateDashboard({data: allTokenData, total_results: totalResults}, network);
+          updateDashboard({
+            data: allTokenData, 
+            total_results: totalResults,
+            meta: {
+              total_results: totalResults,
+              network: network
+            }
+          }, network);
           
           isLoading = false;
         })
