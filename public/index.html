@@ -295,6 +295,15 @@
       vertical-align: middle;
     }
     
+    .pagination-info {
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #555;
+    }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
@@ -421,12 +430,12 @@
     // Tab switching functionality
     function openTab(tabId) {
       // Hide all tab contents
-      document.querySelectorAll('.tab-content').forEach(tab => {
+      document.querySelectorAll('.tab-content').forEach(function(tab) {
         tab.classList.remove('active');
       });
       
       // Remove active class from all tabs
-      document.querySelectorAll('.tab').forEach(tab => {
+      document.querySelectorAll('.tab').forEach(function(tab) {
         tab.classList.remove('active');
       });
       
@@ -434,14 +443,15 @@
       document.getElementById(tabId).classList.add('active');
       
       // Add active class to clicked tab
-      const tabButton = document.querySelector(`.tab[onclick="openTab('${tabId}')"]`);
+      var tabButton = document.querySelector('.tab[onclick="openTab(\'' + tabId + '\')"]');
       if (tabButton) {
         tabButton.classList.add('active');
       }
     }
     
     // Format numbers for display
-    function formatNumber(num, decimals = 4) {
+    function formatNumber(num, decimals) {
+      if (decimals === undefined) decimals = 4;
       if (num === null || num === undefined || isNaN(num)) return '0';
       
       // For very small numbers, use scientific notation
@@ -459,134 +469,192 @@
       return num.toFixed(decimals);
     }
     
-    // Fetch token balances
-    document.getElementById('fetch-btn').addEventListener('click', async function() {
-      const address = document.getElementById('address').value.trim();
-      const network = document.getElementById('network-select').value;
-      const resultsContainer = document.getElementById('results-container');
-      const tokenResults = document.getElementById('token-results');
-      const jsonResults = document.getElementById('json-results');
+    // Global variables for pagination
+    var allTokenData = [];
+    var currentPage = 1;
+    var totalPages = 1;
+    var totalResults = 0;
+    var isLoading = false;
+    
+    // Function to display tokens with pagination info
+    function displayTokens(data, network) {
+      var tokenResults = document.getElementById('token-results');
       
-      // Validate address
-      if (!address) {
-        alert('Please enter an Ethereum address');
-        return;
+      // Calculate summary statistics
+      var totalTokens = totalResults;
+      var tokensWithPrice = allTokenData.filter(function(t) { return t.price_usd; }).length;
+      var totalValue = allTokenData.reduce(function(sum, token) { 
+        return sum + (token.value_usd || 0); 
+      }, 0);
+      
+      // Create summary card
+      var html = '<div class="summary-card">' +
+        '<h3>Summary</h3>' +
+        '<p>Found ' + totalTokens + ' tokens (' + tokensWithPrice + ' with price data)</p>' +
+        '<p>Total Value: $' + formatNumber(totalValue, 2) + '</p>' +
+        '<p>Network: ' + network + '</p>' +
+        '</div>';
+      
+      // Add pagination info if we have multiple pages
+      if (totalPages > 1) {
+        html += '<div class="pagination-info">' +
+          'Showing all ' + allTokenData.length + ' tokens (' + totalPages + ' pages with ' + totalResults + ' total tokens)' +
+          '</div>';
       }
       
-      // Show results container
-      resultsContainer.style.display = 'block';
+      // Create token cards
+      html += '<ul class="token-list">';
       
-      // Show loading state
-      tokenResults.innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div> Loading token data for address ${address.slice(0, 6)}...${address.slice(-4)}
-        </div>
-      `;
-      jsonResults.textContent = 'Loading...';
-      
-      try {
-        // Make API request
-        console.log(`Fetching tokens for ${address} on network ${network}`);
-        const response = await fetch(`/api/balances/${network}/${address}`);
-        const data = await response.json();
+      allTokenData.forEach(function(token) {
+        // Handle token data
+        var decimals = token.decimals || 18;
+        var balance = parseFloat(token.amount) / Math.pow(10, decimals);
+        var symbol = token.symbol || 'Unknown';
+        var name = token.name || symbol;
+        var contract = token.contract || 'Native Token';
         
-        // Display raw JSON data
-        jsonResults.textContent = JSON.stringify(data, null, 2);
-        
-        // Handle API errors
-        if (data.error) {
-          let errorMessage = data.message || data.error;
-          
-          // Special handling for authentication errors
-          if (data.status === 401) {
-            errorMessage = `
-              <p>${data.message}</p>
-              <p>This application requires an API token from The Graph to function.</p>
-              <p>The API token must be set as an environment variable named GRAPH_API_TOKEN in your deployment settings.</p>
-            `;
-          }
-          
-          tokenResults.innerHTML = `
-            <div class="error">
-              <strong>Error:</strong> ${errorMessage}
-            </div>
-          `;
-          return;
+        // Calculate value if price exists
+        var valueHtml = '';
+        if (token.price_usd) {
+          var value = token.value_usd || (balance * token.price_usd);
+          valueHtml = '<div class="token-value">$' + formatNumber(value, 2) + '</div>';
         }
         
-        // Check if we have token data
-        if (!data.data || data.data.length === 0) {
-          tokenResults.innerHTML = `
-            <div class="error">
-              No tokens found for this address on ${network} network
-            </div>
-          `;
-          return;
-        }
-        
-        // Calculate summary statistics
-        const totalTokens = data.data.length;
-        const tokensWithPrice = data.data.filter(t => t.price_usd).length;
-        const totalValue = data.data.reduce((sum, token) => sum + (token.value_usd || 0), 0);
-        
-        // Create summary card
-        let html = `
-          <div class="summary-card">
-            <h3>Summary</h3>
-            <p>Found ${totalTokens} tokens (${tokensWithPrice} with price data)</p>
-            <p>Total Value: $${formatNumber(totalValue, 2)}</p>
-            <p>Network: ${network}</p>
-          </div>
-        `;
-        
-        // Create token cards
-        html += '<ul class="token-list">';
-        
-        data.data.forEach(token => {
-          // Handle token data
-          const decimals = token.decimals || 18;
-          const balance = parseFloat(token.amount) / Math.pow(10, decimals);
-          const symbol = token.symbol || 'Unknown';
-          const name = token.name || symbol;
-          const contract = token.contract || 'Native Token';
+        // Add token card
+        html += '<li class="token-card">' +
+          '<div class="token-symbol">' + symbol + '</div>' +
+          '<div class="token-name">' + name + '</div>' +
+          '<div class="token-balance">' + formatNumber(balance, 6) + ' ' + symbol + '</div>' +
+          valueHtml +
+          '<div class="token-meta">' +
+            '<div>Network: ' + (token.network_id || network) + '</div>' +
+            '<div>Contract: ' + contract.slice(0, 10) + '...' + contract.slice(-8) + '</div>' +
+          '</div>' +
+        '</li>';
+      });
+      
+      html += '</ul>';
+      tokenResults.innerHTML = html;
+    }
+    
+    // Function to fetch a specific page of tokens
+    function fetchTokenPage(address, network, page, limit) {
+      if (limit === undefined) limit = 100;
+      if (isLoading) return;
+      
+      isLoading = true;
+      var tokenResults = document.getElementById('token-results');
+      var jsonResults = document.getElementById('json-results');
+      
+      // Make API request with pagination
+      console.log('Fetching tokens for ' + address + ' on network ' + network + ', page ' + page);
+      
+      fetch('/api/balances/' + network + '/' + address + '?page=' + page + '&limit=' + limit)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          // Display raw JSON data
+          jsonResults.textContent = JSON.stringify(data, null, 2);
           
-          // Calculate value if price exists
-          let valueHtml = '';
-          if (token.price_usd) {
-            const value = token.value_usd || (balance * token.price_usd);
-            valueHtml = `<div class="token-value">$${formatNumber(value, 2)}</div>`;
+          // Handle API errors
+          if (data.error) {
+            var errorMessage = data.message || data.error;
+            
+            // Special handling for authentication errors
+            if (data.status === 401) {
+              errorMessage = '<p>' + data.message + '</p>' +
+                '<p>This application requires an API token from The Graph to function.</p>' +
+                '<p>The API token must be set as an environment variable named GRAPH_API_TOKEN in your deployment settings.</p>';
+            }
+            
+            tokenResults.innerHTML = '<div class="error">' +
+              '<strong>Error:</strong> ' + errorMessage +
+              '</div>';
+            isLoading = false;
+            return;
           }
           
-          // Add token card
-          html += `
-            <li class="token-card">
-              <div class="token-symbol">${symbol}</div>
-              <div class="token-name">${name}</div>
-              <div class="token-balance">${formatNumber(balance, 6)} ${symbol}</div>
-              ${valueHtml}
-              <div class="token-meta">
-                <div>Network: ${token.network_id || network}</div>
-                <div>Contract: ${contract.slice(0, 10)}...${contract.slice(-8)}</div>
-              </div>
-            </li>
-          `;
+          // Check if we have token data
+          if (!data.data || data.data.length === 0) {
+            tokenResults.innerHTML = '<div class="error">' +
+              'No tokens found for this address on ' + network + ' network' +
+              '</div>';
+            isLoading = false;
+            return;
+          }
+          
+          // Update pagination information
+          currentPage = page;
+          totalResults = data.total_results || data.data.length;
+          totalPages = Math.ceil(totalResults / limit);
+          
+          // Add this page's tokens to our collection
+          allTokenData = allTokenData.concat(data.data);
+          
+          // If we have more pages and this is the first page, fetch the rest automatically
+          if (page === 1 && totalPages > 1) {
+            // Update UI to show we're fetching more pages
+            tokenResults.innerHTML = '<div class="loading">' +
+              '<div class="spinner"></div> Loading token data (page ' + page + '/' + totalPages + ')...' +
+              '</div>';
+            
+            // Fetch next page
+            isLoading = false;
+            fetchTokenPage(address, network, page + 1, limit);
+            return;
+          }
+          
+          // Display all tokens we've collected so far
+          displayTokens(data, network);
+          
+          // Update dashboard visualizations with all tokens
+          updateDashboard({data: allTokenData, total_results: totalResults}, network);
+          
+          isLoading = false;
+        })
+        .catch(function(error) {
+          console.error('Error fetching token data:', error);
+          tokenResults.innerHTML = '<div class="error">' +
+            '<strong>Error:</strong> ' + error.message +
+            '</div>';
+          jsonResults.textContent = 'Error: ' + error.message;
+          isLoading = false;
         });
+    }
+    
+    // Initialize event listeners when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fetch token balances
+      document.getElementById('fetch-btn').addEventListener('click', function() {
+        var address = document.getElementById('address').value.trim();
+        var network = document.getElementById('network-select').value;
+        var resultsContainer = document.getElementById('results-container');
+        var tokenResults = document.getElementById('token-results');
+        var jsonResults = document.getElementById('json-results');
         
-        html += '</ul>';
-        tokenResults.innerHTML = html;
+        // Validate address
+        if (!address) {
+          alert('Please enter an Ethereum address');
+          return;
+        }
         
-        // Update dashboard visualizations
-        updateDashboard(data, network);
+        // Reset pagination and data
+        currentPage = 1;
+        allTokenData = [];
         
-      } catch (error) {
-        console.error('Error fetching token data:', error);
-        tokenResults.innerHTML = `
-          <div class="error">
-            <strong>Error:</strong> ${error.message}
-          </div>
-        `;
-        jsonResults.textContent = `Error: ${error.message}`;
-      }
+        // Show results container
+        resultsContainer.style.display = 'block';
+        
+        // Show loading state
+        tokenResults.innerHTML = '<div class="loading">' +
+          '<div class="spinner"></div> Loading token data for address ' + address.slice(0, 6) + '...' + address.slice(-4) +
+          '</div>';
+        jsonResults.textContent = 'Loading...';
+        
+        // Fetch first page of tokens
+        fetchTokenPage(address, network, 1);
+      });
     });
   </script>
 </body>

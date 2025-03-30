@@ -142,8 +142,10 @@ function errorResponse(res, status, message, details = null) {
 app.get('/api/balances/:network/:address', async (req, res) => {
   try {
     const { network, address } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100; // Default to 100 tokens per page
     
-    console.log('API endpoint called with network:', network, 'address:', address);
+    console.log('API endpoint called with network:', network, 'address:', address, 'page:', page, 'limit:', limit);
     console.log('API token available:', !!GRAPH_API_TOKEN);
     
     if (!GRAPH_API_TOKEN) {
@@ -173,8 +175,8 @@ app.get('/api/balances/:network/:address', async (req, res) => {
       });
     }
     
-    // Construct API URL with the correct network_id
-    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}?network_id=${apiNetworkId}`;
+    // Construct API URL with the correct network_id and pagination parameters
+    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}?network_id=${apiNetworkId}&page=${page}&limit=${limit}`;
     
     console.log(`Using API URL: ${apiUrl}`);
     
@@ -230,8 +232,10 @@ app.get('/api/balances/:network/:address', async (req, res) => {
 app.get('/api/balances/:address', async (req, res) => {
   try {
     const { address } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100; // Default to 100 tokens per page
     
-    console.log('API endpoint called with default network and address:', address);
+    console.log('API endpoint called with default network and address:', address, 'page:', page, 'limit:', limit);
     console.log('API token available:', !!GRAPH_API_TOKEN);
     
     if (!GRAPH_API_TOKEN) {
@@ -243,7 +247,7 @@ app.get('/api/balances/:address', async (req, res) => {
     }
     
     // Construct API URL - no network_id means API defaults to Ethereum mainnet
-    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}`;
+    const apiUrl = `${GRAPH_TOKEN_API_ENDPOINT}/${address}?page=${page}&limit=${limit}`;
     
     console.log(`Using default API URL: ${apiUrl}`);
     
